@@ -56,6 +56,60 @@ func InsertCategoryIntoTable(label string, taskID int64) (int64, error) {
 	return result.LastInsertId()
 }
 
+func SelectUserID(username string) int64 {
+	db, err := sql.Open("sqlite3", "./db.sqlite")
+	defer db.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := db.Query("SELECT id FROM Users WHERE name = ?", username)
+	defer result.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var id int64
+	err = result.Scan(&id)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return id
+}
+
+func SelectUserTasks(user_id int64) []Task {
+	db, err := sql.Open("sqlite3", "./db.sqlite")
+	defer db.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := db.Query("SELECT id, title, description, isDone FROM Tasks WHERE user_id = ?", user_id)
+	defer result.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tasks := make([]Task, 0)
+
+	for result.Next() {
+		var task Task
+		err := result.Scan(&task.ID, &task.Title, &task.Description, &task.IsDone)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tasks = append(tasks, task)
+	}
+
+	return tasks
+}
+
 func CreateTableUsers() {
 	db, err := sql.Open("sqlite3", "./db.sqlite")
 	defer db.Close()
@@ -67,7 +121,7 @@ func CreateTableUsers() {
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS Users (
 			id INTEGER  PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
+			name TEXT NOT NULL UNIQUE,
 			password TEXT NOT NULL
 		)
 	`)
