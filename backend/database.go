@@ -81,7 +81,7 @@ func SelectUserID(username string) int64 {
 	return id
 }
 
-func SelectUserTasks(user_id int64) []Task {
+func SelectUserTasks(userID int64) []Task {
 	db, err := sql.Open("sqlite3", "./db.sqlite")
 	defer db.Close()
 
