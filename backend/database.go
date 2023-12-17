@@ -64,12 +64,7 @@ func SelectUserID(username string) int64 {
 		log.Fatal(err)
 	}
 
-	result, err := db.Query("SELECT id FROM Users WHERE name = ?", username)
-	defer result.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	result := db.QueryRow("SELECT id FROM Users WHERE name = ?", username)
 
 	var id int64
 	err = result.Scan(&id)
@@ -89,7 +84,7 @@ func SelectUserTasks(userID int64) []Task {
 		log.Fatal(err)
 	}
 
-	result, err := db.Query("SELECT id, title, description, isDone FROM Tasks WHERE user_id = ?", user_id)
+	result, err := db.Query("SELECT id, title, description, isDone FROM Tasks WHERE user_id = ?", userID)
 	defer result.Close()
 
 	if err != nil {
