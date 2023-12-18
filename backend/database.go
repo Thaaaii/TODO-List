@@ -39,7 +39,7 @@ func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (
 	return result.LastInsertId()
 }
 
-func InsertCategoryIntoTable(label string, taskID int64) (int64, error) {
+func InsertCategoriesIntoTable(categories []string, taskID int64) (int64, error) {
 	db, err := sql.Open("sqlite3", "./db.sqlite")
 	defer db.Close()
 
@@ -47,10 +47,13 @@ func InsertCategoryIntoTable(label string, taskID int64) (int64, error) {
 		log.Fatal(err)
 	}
 
-	result, err := db.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
+	var result sql.Result
+	for _, label := range categories {
+		result, err = db.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return result.LastInsertId()
@@ -84,7 +87,8 @@ func SelectUserTasks(userID int64) []Task {
 		log.Fatal(err)
 	}
 
-	result, err := db.Query("SELECT id, title, description, isDone FROM Tasks WHERE user_id = ?", userID)
+	result, err := db.Query("SELECT Tasks.id, title, description, isDone FROM Tasks WHERE user_id = ?", userID)
+
 	defer result.Close()
 
 	if err != nil {
@@ -96,13 +100,49 @@ func SelectUserTasks(userID int64) []Task {
 	for result.Next() {
 		var task Task
 		err := result.Scan(&task.ID, &task.Title, &task.Description, &task.IsDone)
+
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		task.Categories = append(task.Categories, SelectTaskCategories(int64(task.ID))...)
+
 		tasks = append(tasks, task)
 	}
 
 	return tasks
+}
+
+func SelectTaskCategories(taskID int64) []string {
+	db, err := sql.Open("sqlite3", "./db.sqlite")
+	defer db.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := db.Query("SELECT label FROM Categories WHERE task_id = ?", taskID)
+
+	defer result.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	categories := make([]string, 0)
+
+	for result.Next() {
+		var label string
+		err := result.Scan(&label)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		categories = append(categories, label)
+	}
+
+	return categories
 }
 
 func CreateTables() {

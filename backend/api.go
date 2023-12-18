@@ -30,7 +30,13 @@ func postTasks(ctx *gin.Context) {
 
 	userID := SelectUserID(user)
 
-	_, err := InsertTaskIntoTable(newTask.Title, newTask.Description, newTask.IsDone, userID)
+	taskID, err := InsertTaskIntoTable(newTask.Title, newTask.Description, newTask.IsDone, userID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = InsertCategoriesIntoTable(newTask.Categories, taskID)
 
 	if err != nil {
 		log.Fatal(err)
