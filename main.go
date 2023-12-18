@@ -6,9 +6,7 @@ import (
 )
 
 func main() {
-	//backend.CreateTableUsers()
-	//backend.CreateTableTasks()
-	//backend.CreateTableCategories()
+	//backend.CreateTables()
 	//
 	//lastUserID, _ := backend.InsertUserIntoTable("user1", "passwort")
 	//lastTaskID, _ := backend.InsertTaskIntoTable("Sachen kaufen", "Weihnachtsgeschenke für Schwester", false, lastUserID)

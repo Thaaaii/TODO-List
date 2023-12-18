@@ -1,25 +1,40 @@
 package backend
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func InitServer() {
 	router := gin.Default()
 	router.GET("/:user/tasks", getTasks)
-
+	router.POST("/:user/tasks", postTasks)
 	router.Run("localhost:8080")
 }
 
 func getTasks(ctx *gin.Context) {
 	user := ctx.Param("user")
-	fmt.Println(user)
 	userID := SelectUserID(user)
 	ctx.IndentedJSON(http.StatusOK, SelectUserTasks(userID))
 }
 
 func postTasks(ctx *gin.Context) {
+	user := ctx.Param("user")
+	var newTask Task
 
+	if err := ctx.BindJSON(&newTask); err != nil {
+		log.Fatal(err)
+	}
+
+	userID := SelectUserID(user)
+
+	_, err := InsertTaskIntoTable(newTask.Title, newTask.Description, newTask.IsDone, userID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx.IndentedJSON(http.StatusCreated, newTask)
 }

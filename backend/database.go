@@ -105,7 +105,13 @@ func SelectUserTasks(userID int64) []Task {
 	return tasks
 }
 
-func CreateTableUsers() {
+func CreateTables() {
+	createTableUsers()
+	createTableTasks()
+	createTableCategories()
+}
+
+func createTableUsers() {
 	db, err := sql.Open("sqlite3", "./db.sqlite")
 	defer db.Close()
 
@@ -126,7 +132,7 @@ func CreateTableUsers() {
 	}
 }
 
-func CreateTableTasks() {
+func createTableTasks() {
 	db, err := sql.Open("sqlite3", "./db.sqlite")
 	defer db.Close()
 
@@ -150,7 +156,7 @@ func CreateTableTasks() {
 	}
 }
 
-func CreateTableCategories() {
+func createTableCategories() {
 	db, err := sql.Open("sqlite3", "./db.sqlite")
 	defer db.Close()
 
