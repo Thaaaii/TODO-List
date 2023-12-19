@@ -39,7 +39,7 @@ func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (
 	return result.LastInsertId()
 }
 
-func InsertCategoriesIntoTable(categories []string, taskID int64) (int64, error) {
+func InsertCategoriesIntoTable(categories []string, taskID int64) error {
 	db, err := sql.Open("sqlite3", "./db.sqlite")
 	defer db.Close()
 
@@ -47,16 +47,14 @@ func InsertCategoriesIntoTable(categories []string, taskID int64) (int64, error)
 		log.Fatal(err)
 	}
 
-	var result sql.Result
 	for _, label := range categories {
-		result, err = db.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
+		_, err = db.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-
-	return result.LastInsertId()
+	return err
 }
 
 func SelectUserID(username string) int64 {
@@ -143,6 +141,52 @@ func SelectTaskCategories(taskID int64) []string {
 	}
 
 	return categories
+}
+
+func UpdateTaskCategories(taskID int64, categories []string) {
+	db, err := sql.Open("sqlite3", "./db.sqlite")
+	defer db.Close()
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	_, err = db.Exec(`
+		DELETE FROM Categories 
+		WHERE task_id = ?`,
+		taskID,
+	)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+	err = InsertCategoriesIntoTable(categories, taskID)
+
+	if err != nil {
+		log.Print(err)
+	}
+
+}
+
+func UpdateUserTask(taskID int64, title, description string, isDone bool) {
+	db, err := sql.Open("sqlite3", "./db.sqlite")
+	defer db.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		UPDATE Tasks 
+		SET title = ?, description = ?, isDone = ? 
+		WHERE id = ?`,
+		title, description, isDone, taskID,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func CreateTables() {
