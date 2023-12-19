@@ -189,6 +189,25 @@ func UpdateUserTask(taskID int64, title, description string, isDone bool) {
 	}
 }
 
+func DeleteUserTask(taskID int64) {
+	db, err := sql.Open("sqlite3", "./db.sqlite")
+	defer db.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`
+		DELETE FROM Tasks
+		WHERE id = ?`,
+		taskID,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func CreateTables() {
 	createTableUsers()
 	createTableTasks()

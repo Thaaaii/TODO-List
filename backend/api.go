@@ -10,9 +10,16 @@ import (
 
 func InitServer() {
 	router := gin.Default()
+	router.LoadHTMLFiles("frontend/index.html")
+	router.GET("/todo-list", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "TODO-Liste",
+		})
+	})
 	router.GET("/:user/tasks", getTasks)
 	router.POST("/:user/tasks", postTasks)
 	router.PATCH(":user/tasks/:taskID", patchTask)
+	router.DELETE(":user/tasks/:taskID", deleteTask)
 	router.Run("localhost:8080")
 }
 
@@ -64,5 +71,20 @@ func patchTask(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "ressource with ID " + ctx.Param("taskID") + " updated.",
+	})
+}
+
+func deleteTask(ctx *gin.Context) {
+	taskID, err := strconv.ParseInt(ctx.Param("taskID"), 10, 64)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	DeleteUserTask(taskID)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "ressource deleted",
+		"id":      taskID,
 	})
 }
