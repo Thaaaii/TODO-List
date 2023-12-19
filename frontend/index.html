@@ -2,11 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content ="width=device-width, initial-scale=1.0">
     <title>TODO-Liste</title>
-    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/GNOME_Todo_icon_2019.svg/1200px-GNOME_Todo_icon_2019.svg.png">
 
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/GNOME_Todo_icon_2019.svg/1200px-GNOME_Todo_icon_2019.svg.png">
+    <link rel="stylesheet" href="main.css"/>
 </head>
 <body>
-    <h1>TODO</h1>
+    <header>
+        <h1>TODO</h1>
+        <form id="new-task-form">
+            <input type="text" id="new-task-input" placeholder="Was ist geplant?"\>
+            <input type="submit" id="new-task-submit" value="Aufgaben hinzufügen"\>
+        </form>
+    </header>
+
+    <main>
+        <section class="task-list">
+            <h2>Deine Aufgaben</h2>
+            <div id="tasks">
+
+            </div>
+        </section>
+    </main>
+
+    <script src="main.js"></script>
+
 </body>
 </html>

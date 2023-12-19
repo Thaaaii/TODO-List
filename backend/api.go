@@ -10,16 +10,20 @@ import (
 
 func InitServer() {
 	router := gin.Default()
+
 	router.LoadHTMLFiles("frontend/index.html")
+	router.Static("/static", "./frontend")
 	router.GET("/todo-list", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{
 			"title": "TODO-Liste",
 		})
 	})
+
 	router.GET("/:user/tasks", getTasks)
 	router.POST("/:user/tasks", postTasks)
 	router.PATCH(":user/tasks/:taskID", patchTask)
 	router.DELETE(":user/tasks/:taskID", deleteTask)
+
 	router.Run("localhost:8080")
 }
 
