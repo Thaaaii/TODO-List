@@ -49,15 +49,28 @@ window.addEventListener("load", () =>{
 
         list_el.appendChild(task_el);
 
+        const task_description_el = document.createElement("div");
+        task_description_el.classList.add("description");
+
+        const description_input_el = document.createElement("textarea");
+        description_input_el.classList.add("text");
+        description_input_el.placeholder = "Beschreibung hinzufügen...";
+        description_input_el.setAttribute("readonly", "readonly");
+
+        task_description_el.appendChild(description_input_el);
+        task_el.appendChild(task_description_el);
+
         input.value = "";
 
         task_edit_el.addEventListener("click", () => {
             if(task_edit_el.innerText.toLocaleLowerCase() == "bearbeiten"){
                 task_input_el.removeAttribute("readonly");
+                description_input_el.removeAttribute("readonly");
                 task_input_el.focus();
                 task_edit_el.innerText = "Speichern";
             }else{
                 task_input_el.setAttribute("readonly", "readonly");
+                description_input_el.setAttribute("readonly", "readonly");
                 task_edit_el.innerText = "Bearbeiten";
             }
         })
@@ -65,6 +78,9 @@ window.addEventListener("load", () =>{
         task_delete_el.addEventListener("click", () => {
             list_el.removeChild(task_el);
         });
+
+
+
     });
 });
 
