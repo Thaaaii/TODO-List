@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="main.css"/>
 </head>
 <body>
+
     <header>
-        <h1>TODO</h1>
+        <h1>TODO Liste</h1>
         <form id="new-task-form">
             <input type="text" id="new-task-input" placeholder="Was ist geplant?"\>
-            <input type="submit" id="new-task-submit" value="Aufgaben hinzufügen"\>
+            <input type="submit" id="new-task-submit" value="Aufgabe hinzufügen"\>
         </form>
     </header>
 
@@ -22,6 +23,20 @@
         <section class="task-list">
             <h2>Deine Aufgaben</h2>
             <div id="tasks">
+
+                <div class="task">
+                    <div class="content">
+                        <div class="checkbox"></div>
+                        <input type="text" class="text" value="Sachen" readonly>
+                    </div>
+                    <div class="actions">
+                        <button class="edit">Bearbeiten</button>
+                        <button class="delete">Löschen</button>
+                    </div>
+<!--                    <div class="description">-->
+<!--                        <input type="text" class="text" value="Sachen" readonly>-->
+<!--                    </div>-->
+                </div>
 
             </div>
         </section>

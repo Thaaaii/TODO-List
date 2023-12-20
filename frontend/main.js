@@ -3,6 +3,8 @@ window.addEventListener("load", () =>{
     const input = document.querySelector("#new-task-input");
     const list_el = document.querySelector("#tasks");
 
+    //loadUserTasks()
+
     form.addEventListener("submit", (e) => {
         e.preventDefault();
 
@@ -65,3 +67,21 @@ window.addEventListener("load", () =>{
         });
     });
 });
+
+function loadUserTasks(){
+    const URL = "http://localhost:8080/user1/tasks";
+
+    fetch(URL)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => {
+            console.error("Fetch error:", error);
+        })
+}
