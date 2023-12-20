@@ -48,7 +48,7 @@ input, button{
 }
 
 #new-task-input{
-    flex: 1 1 0%;
+    flex: 1 1 0;
     background-color: var(--darker);
     padding: 1rem;
     border-radius: 1rem;
@@ -81,7 +81,7 @@ input, button{
 }
 
 main{
-    flex: 1 1 0%;
+    flex: 1 1 0;
     padding: 2rem 1rem;
     max-width: 800px;
     width: 100%;
@@ -102,6 +102,7 @@ main{
 
 #tasks .task{
     display: flex;
+    flex-flow: row wrap;
     justify-content: space-between;
     background-color: var(--darkest);
     padding: 1rem;
@@ -110,12 +111,13 @@ main{
 }
 
 #task .task .content{
-    flex: 1 1 0%;
+    flex: 1 1 0;
 }
 
 #tasks .task .content .text{
     color: var(--light);
     font-size: 1.125rem;
+    font-weight: bold;
     width: 100%;
     display: block;
     transition: 0.4s;
@@ -168,5 +170,26 @@ main{
 }
 
 .description{
+    display: flex;
+    flex: 1 100%;
+    padding-top: 10px;
+}
+
+#tasks .task .description .text{
+    color: var(--gray);
+    background-color: var(--darker);
+    font-size: 1.125rem;
+    width: 100%;
     display: block;
+    padding: 1em;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    outline: none;
+    line-height: 1.4;
+    transition: all 0.2s;
+    resize: none;
+}
+
+#tasks .task .description .text:not(:read-only):hover{
+    background-color: #1F2C37;
 }
