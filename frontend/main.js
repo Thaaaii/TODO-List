@@ -23,6 +23,10 @@ window.addEventListener("load", () =>{
 
         task_el.appendChild(task_content_el);
 
+        const task_checker_el = document.createElement("img");
+        task_checker_el.src = "../img/unchecked.png";
+        task_content_el.appendChild(task_checker_el);
+
         const task_input_el = document.createElement("input")
         task_input_el.classList.add("text");
         task_input_el.type = "text";
@@ -79,7 +83,11 @@ window.addEventListener("load", () =>{
             list_el.removeChild(task_el);
         });
 
-
+        task_checker_el.addEventListener("click", function (e) {
+            if(e.target.tagName === "IMG"){
+                e.target.classList.toggle("checked");
+            }
+        })
 
     });
 });

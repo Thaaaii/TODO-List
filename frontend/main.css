@@ -160,13 +160,16 @@ main{
     color: crimson;
 }
 
-.checkbox{
+#tasks .task .content img{
     position: absolute;
     width: 25px;
     height: 25px;
     background-size: cover;
     background-position: center;
-    background-image: url(../img/unchecked.png);
+}
+
+.checked{
+    content: url("../img/checked.png");
 }
 
 .description{
