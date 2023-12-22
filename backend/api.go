@@ -20,8 +20,8 @@ func InitServer() {
 		})
 	})
 
-	router.GET("/todo-list/:user/tasks", getTasks)
-	router.POST("/todo-list/:user/tasks", postTasks)
+	router.GET("/:user/tasks", getTasks)
+	router.POST("/:user/tasks", postTasks)
 	router.PATCH("/todo-list/:user/tasks/:taskID", patchTask)
 	router.DELETE("/todo-list/:user/tasks/:taskID", deleteTask)
 

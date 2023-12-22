@@ -8,21 +8,8 @@ loadWebsite()
 // Adds an event listener to execute tasks when the website is loaded
 function loadWebsite(){
     window.addEventListener("load", () =>{
-
         loadUserTasks();
-
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-
-            const task = input.value;
-
-            if(!task){
-                alert("Gib bitte eine Aufgabe an!");
-                return;
-            }
-
-            addTask(-1, task)
-        });
+        submitTask();
     });
 }
 
@@ -40,8 +27,10 @@ function addTask(id=-1, taskTitle="", description="", isDone=false){
     const task_checker_el = document.createElement("img");
     if(isDone) {
         task_checker_el.src = "/img/checked.png";
+        task_checker_el.setAttribute("checked", "true");
     }else{
         task_checker_el.src = "/img/unchecked.png";
+        task_checker_el.setAttribute("checked", "false");
     }
     task_content_el.appendChild(task_checker_el);
 
@@ -90,6 +79,49 @@ function addTask(id=-1, taskTitle="", description="", isDone=false){
     toggleCheckbox(task_checker_el);
 }
 
+function submitTask(){
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const task = input.value;
+
+        if(!task){
+            alert("Gib bitte eine Aufgabe an!");
+            return;
+        }
+        
+        const URL = "/user1/tasks";
+
+        const data = {
+            title: task,
+            description: "",
+            is_done: false
+        }
+
+        fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok");
+                }
+                addTask(-1, task)
+                return response.json();
+            })
+            .then(data => {
+                console.log("Response successful:", data);
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    });
+
+}
+
 //Adds an event listener to toggle between edit and static display
 function toggleEdit(task_edit_el, task_input_el, description_input_el){
     task_edit_el.addEventListener("click", () => {
@@ -115,8 +147,7 @@ function deleteTask(task_delete_el, task_el){
         fetch(URL, {method: "DELETE"})
             .then(response => {
                 if(!response.ok){
-                    //Nachricht einfügen
-                    throw new Error();
+                    throw new Error("Network response was not ok");
                 }
                 list_el.removeChild(task_el);
             })
@@ -129,25 +160,23 @@ function deleteTask(task_delete_el, task_el){
 //Adds an event listener to toggle and mark the checkbox of tasks
 function toggleCheckbox(task_checker_el){
     task_checker_el.addEventListener("click", function (e) {
-        // if(e.target.tagName === "IMG"){
-        //     e.target.classList.toggle("checked");
-        // }
         if(task_checker_el.getAttribute("src") === "/img/checked.png"){
             task_checker_el.setAttribute("src", "/img/unchecked.png");
+            task_checker_el.setAttribute("checked", "false");
         }else{
             task_checker_el.setAttribute("src", "/img/checked.png");
+            task_checker_el.setAttribute("checked", "true");
         }
     })
 }
 
 //Fetches and loads user specific tasks
 function loadUserTasks(){
-    const URL = "http://localhost:8080/todo-list/user1/tasks";
+    const URL = "http://localhost:8080/user1/tasks";
 
     fetch(URL)
         .then(response => {
             if(!response.ok){
-                //Nachricht überarbeiten
                 throw new Error("Network response was not ok");
             }
             return response.json();
