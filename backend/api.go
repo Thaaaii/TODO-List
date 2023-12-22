@@ -12,8 +12,9 @@ func InitServer() {
 	router := gin.Default()
 
 	router.LoadHTMLFiles("frontend/index.html")
+	router.Static("img", "./img")
 	router.Static("/static", "./frontend")
-	router.GET("/todo-list", func(ctx *gin.Context) {
+	router.GET("/todo-list/:user", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{
 			"title": "TODO-Liste",
 		})

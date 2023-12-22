@@ -169,7 +169,7 @@ main{
 }
 
 .checked{
-    content: url("../img/checked.png");
+    content: url("img/checked.png");
 }
 
 .description{

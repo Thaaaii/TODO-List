@@ -5,9 +5,11 @@ const list_el = document.querySelector("#tasks");
 loadWebsite()
 
 
-
+// Adds an event listener to execute tasks when the website is loaded
 function loadWebsite(){
     window.addEventListener("load", () =>{
+
+        loadUserTasks();
 
         form.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -24,7 +26,7 @@ function loadWebsite(){
     });
 }
 
-//Adds task into list
+//Adds a task element into the list
 function addTask(isDone=false, taskTitle="", description=""){
     const task_el = document.createElement("div");
     task_el.classList.add("task");
@@ -35,7 +37,10 @@ function addTask(isDone=false, taskTitle="", description=""){
     task_el.appendChild(task_content_el);
 
     const task_checker_el = document.createElement("img");
-    task_checker_el.src = "../img/unchecked.png";
+    if(isDone) {
+        task_checker_el.classList.add("checked");
+    }
+    task_checker_el.src = "/img/unchecked.png";
     task_content_el.appendChild(task_checker_el);
 
     const task_input_el = document.createElement("input")
@@ -83,7 +88,7 @@ function addTask(isDone=false, taskTitle="", description=""){
     toggleCheckbox(task_checker_el);
 }
 
-//Toggles between edit and static display
+//Adds an event listener to toggle between edit and static display
 function toggleEdit(task_edit_el, task_input_el, description_input_el){
     task_edit_el.addEventListener("click", () => {
         if(task_edit_el.innerText.toLocaleLowerCase() === "bearbeiten"){
@@ -99,14 +104,14 @@ function toggleEdit(task_edit_el, task_input_el, description_input_el){
     })
 }
 
-//Deletes targeted task-element
+//Adds an event listener to delete the targeted task element
 function deleteTask(task_delete_el, task_el){
     task_delete_el.addEventListener("click", () => {
         list_el.removeChild(task_el);
     });
 }
 
-//Toggles and marks checkbox of task
+//Adds an event listener to toggle and mark the checkbox of tasks
 function toggleCheckbox(task_checker_el){
     task_checker_el.addEventListener("click", function (e) {
         if(e.target.tagName === "IMG"){
@@ -127,7 +132,9 @@ function loadUserTasks(){
             return response.json();
         })
         .then(data => {
-            console.log(data);
+            data.forEach(task => {
+                addTask(task.is_done, task.title, task.description);
+            })
         })
         .catch(error => {
             console.error("Fetch error:", error);
