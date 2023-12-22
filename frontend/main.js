@@ -4,7 +4,6 @@ const list_el = document.querySelector("#tasks");
 
 loadWebsite()
 
-
 // Adds an event listener to execute tasks when the website is loaded
 function loadWebsite(){
     window.addEventListener("load", () =>{
@@ -13,7 +12,7 @@ function loadWebsite(){
     });
 }
 
-//Adds a task element into the list
+//Adds a task element with functionality and event listener into the list
 function addTask(id="", taskTitle="", description="", isDone=false){
     const task_el = document.createElement("div");
     task_el.classList.add("task");
@@ -72,6 +71,13 @@ function addTask(id="", taskTitle="", description="", isDone=false){
     task_description_el.appendChild(description_input_el);
     task_el.appendChild(task_description_el);
 
+    const categories_list_el = document.querySelector("ul");
+    let categories_input_el = categories_list_el.querySelector("input");
+
+    let tags = [];
+    //TODO
+    categories_input_el.addEventListener("keyup",(e, categories_ul_el, tasks) => addTag)
+
     input.value = "";
 
     toggleEdit(id, task_edit_el, task_input_el, description_input_el, task_checker_el.getAttribute("checked"));
@@ -79,7 +85,28 @@ function addTask(id="", taskTitle="", description="", isDone=false){
     toggleCheckbox(id, task_input_el.value, description_input_el.value, task_checker_el);
 }
 
-//Adds an event listener to submit new empty tasks
+//Fetches and loads user specific tasks from the database
+function loadUserTasks(){
+    const URL = "http://localhost:8080/user1/tasks";
+
+    fetch(URL)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            data.forEach(task => {
+                addTask(task.id, task.title, task.description, task.is_done);
+            })
+        })
+        .catch(error => {
+            console.error("Fetch error:", error);
+        })
+}
+
+//Adds an event listener to submit new empty tasks and create a new set of data in the database
 function submitTask(){
     form.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -153,7 +180,34 @@ function updateTask(id, title, description, is_done){
         })
 }
 
-//Adds an event listener to toggle between edit and static display
+function addTag(categories_list_el, categories_input_el, tags){
+    if(e.key == "Enter"){
+        let tag = e.target.value.replace(/\s+/g, "");
+        if(tag.length > 1 && !tags.includes(tag)){
+            tag.split(",").forEach(tag => {
+                tags.push(tag);
+                createTag(tags);
+            })
+        }
+        e.target.value = "";
+    }
+}
+
+function createTag(ul, tags){
+    ul.querySelectorAll("li").forEach(li => li.remove())
+    tags.slice().reverse().forEach(tag => {
+        let liTag = `<li>${tag}<i class="uit uit-multipliy" onclick="removeTag(this, '${tag}', '${tags}')"></i></li>`;
+        ul.insertAdjacentHTML("afterbegin", liTag);
+    })
+}
+
+function removeTag(element, tag, tags){
+    let index = tags.indexOf(tag);
+    tags = [...tags.slice(0, index), ...tags.slice(index+1)];
+    element.parentElement.remove();
+}
+
+//Adds an event listener to toggle between edit and static display. Changes update the database
 function toggleEdit(id, task_edit_el, task_input_el, description_input_el, task_checker_el){
     task_edit_el.addEventListener("click", () => {
         if(task_edit_el.innerText.toLocaleLowerCase() === "bearbeiten"){
@@ -170,7 +224,7 @@ function toggleEdit(id, task_edit_el, task_input_el, description_input_el, task_
     })
 }
 
-//Adds an event listener to delete the targeted task element
+//Adds an event listener to delete the targeted task element and make changes in the database
 function deleteTask(task_delete_el, task_el){
     task_delete_el.addEventListener("click", () => {
 
@@ -189,7 +243,7 @@ function deleteTask(task_delete_el, task_el){
     });
 }
 
-//Adds an event listener to toggle and mark the checkbox of tasks
+//Adds an event listener to toggle and mark the checkbox of tasks + update in database
 function toggleCheckbox(id, title, description, task_checker_el){
     task_checker_el.addEventListener("click", () => {
         if(task_checker_el.getAttribute("src") === "/img/checked.png"){
@@ -201,25 +255,4 @@ function toggleCheckbox(id, title, description, task_checker_el){
         }
         updateTask(id, title, description, task_checker_el.getAttribute("checked"))
     })
-}
-
-//Fetches and loads user specific tasks
-function loadUserTasks(){
-    const URL = "http://localhost:8080/user1/tasks";
-
-    fetch(URL)
-        .then(response => {
-            if(!response.ok){
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then(data => {
-            data.forEach(task => {
-                addTask(task.id, task.title, task.description, task.is_done);
-            })
-        })
-        .catch(error => {
-            console.error("Fetch error:", error);
-        })
 }
