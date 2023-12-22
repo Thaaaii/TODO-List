@@ -14,7 +14,7 @@ function loadWebsite(){
 }
 
 //Adds a task element into the list
-function addTask(id=-1, taskTitle="", description="", isDone=false){
+function addTask(id="", taskTitle="", description="", isDone=false){
     const task_el = document.createElement("div");
     task_el.classList.add("task");
     task_el.setAttribute("data-id", id);
@@ -74,11 +74,12 @@ function addTask(id=-1, taskTitle="", description="", isDone=false){
 
     input.value = "";
 
-    toggleEdit(task_edit_el, task_input_el, description_input_el);
+    toggleEdit(id, task_edit_el, task_input_el, description_input_el, task_checker_el.getAttribute("checked"));
     deleteTask(task_delete_el, task_el);
-    toggleCheckbox(task_checker_el);
+    toggleCheckbox(id, task_input_el.value, description_input_el.value, task_checker_el);
 }
 
+//Adds an event listener to submit new empty tasks
 function submitTask(){
     form.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -89,7 +90,7 @@ function submitTask(){
             alert("Gib bitte eine Aufgabe an!");
             return;
         }
-        
+
         const URL = "/user1/tasks";
 
         const data = {
@@ -109,7 +110,7 @@ function submitTask(){
                 if(!response.ok){
                     throw new Error("Network response was not ok");
                 }
-                addTask(-1, task)
+                addTask("", task)
                 return response.json();
             })
             .then(data => {
@@ -119,11 +120,41 @@ function submitTask(){
                 console.error(error);
             })
     });
+}
 
+//Updates a task and makes changes in the database
+function updateTask(id, title, description, is_done){
+    const URL = "/todo-list/user1/tasks/" + id;
+
+    const data = {
+        title: title,
+        description: description,
+        is_done: {"true": true, "false": false}[is_done]
+    }
+
+    fetch(URL, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if(!response.ok){
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Response successful:", data);
+        })
+        .catch(error => {
+            console.error(error);
+        })
 }
 
 //Adds an event listener to toggle between edit and static display
-function toggleEdit(task_edit_el, task_input_el, description_input_el){
+function toggleEdit(id, task_edit_el, task_input_el, description_input_el, task_checker_el){
     task_edit_el.addEventListener("click", () => {
         if(task_edit_el.innerText.toLocaleLowerCase() === "bearbeiten"){
             task_input_el.removeAttribute("readonly");
@@ -134,6 +165,7 @@ function toggleEdit(task_edit_el, task_input_el, description_input_el){
             task_input_el.setAttribute("readonly", "readonly");
             description_input_el.setAttribute("readonly", "readonly");
             task_edit_el.innerText = "Bearbeiten";
+            updateTask(id, task_input_el.value, description_input_el.value, task_checker_el.getAttribute("checked"));
         }
     })
 }
@@ -158,8 +190,8 @@ function deleteTask(task_delete_el, task_el){
 }
 
 //Adds an event listener to toggle and mark the checkbox of tasks
-function toggleCheckbox(task_checker_el){
-    task_checker_el.addEventListener("click", function (e) {
+function toggleCheckbox(id, title, description, task_checker_el){
+    task_checker_el.addEventListener("click", () => {
         if(task_checker_el.getAttribute("src") === "/img/checked.png"){
             task_checker_el.setAttribute("src", "/img/unchecked.png");
             task_checker_el.setAttribute("checked", "false");
@@ -167,6 +199,7 @@ function toggleCheckbox(task_checker_el){
             task_checker_el.setAttribute("src", "/img/checked.png");
             task_checker_el.setAttribute("checked", "true");
         }
+        updateTask(id, title, description, task_checker_el.getAttribute("checked"))
     })
 }
 
