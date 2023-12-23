@@ -14,6 +14,8 @@ function loadWebsite(){
 
 //Adds a task element with functionality and event listener into the list
 function addTask(id="", taskTitle="", description="", isDone=false){
+
+    //Container to place components of task elements
     const task_el = document.createElement("div");
     task_el.classList.add("task");
     task_el.setAttribute("data-id", id);
@@ -23,6 +25,7 @@ function addTask(id="", taskTitle="", description="", isDone=false){
 
     task_el.appendChild(task_content_el);
 
+    //Checkbox of task element
     const task_checker_el = document.createElement("img");
     if(isDone) {
         task_checker_el.src = "/img/checked.png";
@@ -31,8 +34,10 @@ function addTask(id="", taskTitle="", description="", isDone=false){
         task_checker_el.src = "/img/unchecked.png";
         task_checker_el.setAttribute("checked", "false");
     }
+
     task_content_el.appendChild(task_checker_el);
 
+    //Title of task element
     const task_input_el = document.createElement("input")
     task_input_el.classList.add("text");
     task_input_el.type = "text";
@@ -41,6 +46,7 @@ function addTask(id="", taskTitle="", description="", isDone=false){
 
     task_content_el.appendChild(task_input_el)
 
+    //Action buttons to modify or delete task elements
     const task_actions_el = document.createElement("div");
     task_actions_el.classList.add("actions");
 
@@ -59,6 +65,7 @@ function addTask(id="", taskTitle="", description="", isDone=false){
 
     list_el.appendChild(task_el);
 
+    //Description section of task element
     const task_description_el = document.createElement("div");
     task_description_el.classList.add("description");
 
@@ -71,16 +78,41 @@ function addTask(id="", taskTitle="", description="", isDone=false){
     task_description_el.appendChild(description_input_el);
     task_el.appendChild(task_description_el);
 
-    const categories_list_el = document.querySelector("ul");
-    let categories_input_el = categories_list_el.querySelector("input");
+    //Category section of task element
+    const categories_el = document.createElement("div");
+    categories_el.classList.add("categories");
 
-    let tags = [];
-    //TODO
-    categories_input_el.addEventListener("keyup",(e, categories_ul_el, tasks) => addTag)
+    const categories_title_container_el = document.createElement("div");
+    categories_title_container_el.classList.add("title");
+
+    const categories_image_el = document.createElement("img");
+    categories_image_el.src = "/img/tag.png";
+
+    const categories_title_el = document.createElement("h2");
+    categories_title_el.innerHTML = "Kategorien";
+
+    categories_title_container_el.appendChild(categories_image_el);
+    categories_title_container_el.appendChild(categories_title_el);
+
+    const categories_content_el = document.createElement("div");
+    categories_content_el.classList.add("category-content");
+
+    const categories_list_el = document.createElement("ul");
+    const categories_input_el = document.createElement("input");
+    categories_input_el.classList.add("text");
+    categories_input_el.setAttribute("readonly", "readonly");
+
+    categories_list_el.appendChild(categories_input_el);
+    categories_content_el.append(categories_list_el);
+    categories_el.appendChild(categories_title_container_el);
+    categories_el.appendChild(categories_content_el);
+
+    task_el.appendChild(categories_el);
 
     input.value = "";
 
-    toggleEdit(id, task_edit_el, task_input_el, description_input_el, task_checker_el.getAttribute("checked"));
+    addTags(categories_list_el, categories_input_el);
+    toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_input_el, task_checker_el.getAttribute("checked"));
     deleteTask(task_delete_el, task_el);
     toggleCheckbox(id, task_input_el.value, description_input_el.value, task_checker_el);
 }
@@ -180,46 +212,59 @@ function updateTask(id, title, description, is_done){
         })
 }
 
-function addTag(categories_list_el, categories_input_el, tags){
-    if(e.key == "Enter"){
-        let tag = e.target.value.replace(/\s+/g, "");
-        if(tag.length > 1 && !tags.includes(tag)){
-            tag.split(",").forEach(tag => {
-                tags.push(tag);
-                createTag(tags);
-            })
-        }
-        e.target.value = "";
-    }
+//Returns all current tags in the category section
+function getTags(categories_list_el){
+    let tags = [];
+    categories_list_el.querySelectorAll("li").forEach(li => tags.push(li.innerText));
+    return tags;
 }
 
-function createTag(ul, tags){
-    ul.querySelectorAll("li").forEach(li => li.remove())
-    tags.slice().reverse().forEach(tag => {
-        let liTag = `<li>${tag}<i class="uit uit-multipliy" onclick="removeTag(this, '${tag}', '${tags}')"></i></li>`;
-        ul.insertAdjacentHTML("afterbegin", liTag);
+//Adds an event handler to confirm and insert tags into the category section
+function addTags(categories_list_el, categories_input_el){
+    categories_input_el.addEventListener("keyup",(e) => {
+        if(e.key == "Enter"){
+            let tags = getTags(categories_list_el);
+            let tag = e.target.value.replace(/\s+/g, " ");
+            if(tag.length > 1 && !tags.includes(tag)){
+                tag.split(",").forEach(tag => {
+                    tags.push(tag);
+                    createTag(categories_list_el, tags);
+                })
+            }
+            e.target.value = "";
+        }
     })
 }
 
-function removeTag(element, tag, tags){
-    let index = tags.indexOf(tag);
-    tags = [...tags.slice(0, index), ...tags.slice(index+1)];
+//Creates a tag and inserts it into the right position
+function createTag(categories_list_el, tags){
+    categories_list_el.querySelectorAll("li").forEach(li => li.remove());
+    tags.slice().reverse().forEach(tag => {
+        let liTag = `<li>${tag}<i class="uit uit-multiply" onclick="removeTag(this)"></i></li>`;
+        categories_list_el.insertAdjacentHTML("afterbegin", liTag);
+    })
+}
+
+//Handler for onclick event to delete a tag
+function removeTag(element){
     element.parentElement.remove();
 }
 
 //Adds an event listener to toggle between edit and static display. Changes update the database
-function toggleEdit(id, task_edit_el, task_input_el, description_input_el, task_checker_el){
+function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_input_el, is_done){
     task_edit_el.addEventListener("click", () => {
         if(task_edit_el.innerText.toLocaleLowerCase() === "bearbeiten"){
             task_input_el.removeAttribute("readonly");
             description_input_el.removeAttribute("readonly");
+            categories_input_el.removeAttribute("readonly");
             task_input_el.focus();
             task_edit_el.innerText = "Speichern";
         }else{
             task_input_el.setAttribute("readonly", "readonly");
             description_input_el.setAttribute("readonly", "readonly");
+            categories_input_el.setAttribute("readonly", "readonly");
             task_edit_el.innerText = "Bearbeiten";
-            updateTask(id, task_input_el.value, description_input_el.value, task_checker_el.getAttribute("checked"));
+            updateTask(id, task_input_el.value, description_input_el.value, is_done);
         }
     })
 }

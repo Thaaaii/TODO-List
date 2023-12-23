@@ -211,6 +211,7 @@ main{
 .categories .title h2{
     font-size: 14px;
     font-weight: 600;
+    color: #FFF;
     padding-top: 12px;
     margin-left: 8px;
 }
@@ -230,12 +231,13 @@ main{
 }
 
 .category-content ul li{
-    list-style: none;
+    color: var(--gray);
+    list-style-type: none;
     margin: 4px 3px;
     border-radius: 5px;
     padding: 5px 8px 5px 10px;
     border: 1px solid #1F2C37;
-    background: var(--gray);
+    background: var(--dark);
 }
 
 .category-content ul li i{
@@ -252,4 +254,5 @@ main{
     outline: none;
     padding: 5px;
     font-size: 16px;
+    color: var(--gray);
 }
