@@ -13,7 +13,7 @@ function loadWebsite(){
 }
 
 //Adds a task element with functionality and event listener into the list
-function addTask(id="", taskTitle="", description="", isDone=false){
+function addTask(id="", taskTitle="", description="", categories=[], isDone=false){
 
     //Container to place components of task elements
     const task_el = document.createElement("div");
@@ -101,6 +101,7 @@ function addTask(id="", taskTitle="", description="", isDone=false){
     const categories_input_el = document.createElement("input");
     categories_input_el.classList.add("text");
     categories_input_el.setAttribute("readonly", "readonly");
+    createTag(categories_list_el, categories);
 
     categories_list_el.appendChild(categories_input_el);
     categories_content_el.append(categories_list_el);
@@ -112,7 +113,7 @@ function addTask(id="", taskTitle="", description="", isDone=false){
     input.value = "";
 
     addTags(categories_list_el, categories_input_el);
-    toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_input_el, task_checker_el.getAttribute("checked"));
+    toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, task_checker_el.getAttribute("checked"));
     deleteTask(task_delete_el, task_el);
     toggleCheckbox(id, task_input_el.value, description_input_el.value, task_checker_el);
 }
@@ -130,7 +131,10 @@ function loadUserTasks(){
         })
         .then(data => {
             data.forEach(task => {
-                addTask(task.id, task.title, task.description, task.is_done);
+                if(task.categories == null){
+                    task.categories = [];
+                }
+                addTask(task.id, task.title, task.description, task.categories, task.is_done);
             })
         })
         .catch(error => {
@@ -182,12 +186,13 @@ function submitTask(){
 }
 
 //Updates a task and makes changes in the database
-function updateTask(id, title, description, is_done){
+function updateTask(id, title, description, tags, is_done){
     const URL = "/todo-list/user1/tasks/" + id;
 
     const data = {
         title: title,
         description: description,
+        categories: tags,
         is_done: {"true": true, "false": false}[is_done]
     }
 
@@ -222,7 +227,7 @@ function getTags(categories_list_el){
 //Adds an event handler to confirm and insert tags into the category section
 function addTags(categories_list_el, categories_input_el){
     categories_input_el.addEventListener("keyup",(e) => {
-        if(e.key == "Enter"){
+        if(e.key === "Enter"){
             let tags = getTags(categories_list_el);
             let tag = e.target.value.replace(/\s+/g, " ");
             if(tag.length > 1 && !tags.includes(tag)){
@@ -240,7 +245,7 @@ function addTags(categories_list_el, categories_input_el){
 function createTag(categories_list_el, tags){
     categories_list_el.querySelectorAll("li").forEach(li => li.remove());
     tags.slice().reverse().forEach(tag => {
-        let liTag = `<li>${tag}<i class="uit uit-multiply" onclick="removeTag(this)"></i></li>`;
+        let liTag = `<li>${tag}<i class="uit uit-multiply"></i></li>`;
         categories_list_el.insertAdjacentHTML("afterbegin", liTag);
     })
 }
@@ -250,21 +255,35 @@ function removeTag(element){
     element.parentElement.remove();
 }
 
+function disableTagDeletion(tags){
+    tags.forEach(tag => {
+        tag.removeAttribute("onclick");
+    })
+}
+
+function enableTagDeletion(tags){
+    tags.forEach(tag => {
+        tag.setAttribute("onclick", "removeTag(this)");
+    })
+}
+
 //Adds an event listener to toggle between edit and static display. Changes update the database
-function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_input_el, is_done){
+function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, is_done){
     task_edit_el.addEventListener("click", () => {
         if(task_edit_el.innerText.toLocaleLowerCase() === "bearbeiten"){
             task_input_el.removeAttribute("readonly");
             description_input_el.removeAttribute("readonly");
             categories_input_el.removeAttribute("readonly");
+            enableTagDeletion(categories_list_el.querySelectorAll("i"));
             task_input_el.focus();
             task_edit_el.innerText = "Speichern";
         }else{
             task_input_el.setAttribute("readonly", "readonly");
             description_input_el.setAttribute("readonly", "readonly");
             categories_input_el.setAttribute("readonly", "readonly");
+            disableTagDeletion(categories_list_el.querySelectorAll("i"));
             task_edit_el.innerText = "Bearbeiten";
-            updateTask(id, task_input_el.value, description_input_el.value, is_done);
+            updateTask(id, task_input_el.value, description_input_el.value, getTags(categories_list_el), is_done);
         }
     })
 }
