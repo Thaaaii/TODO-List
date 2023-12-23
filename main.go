@@ -6,5 +6,6 @@ import (
 )
 
 func main() {
+	backend.InitDatabase()
 	backend.InitServer()
 }

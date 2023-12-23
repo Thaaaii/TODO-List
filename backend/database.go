@@ -5,92 +5,65 @@ import (
 	"log"
 )
 
-func InsertUserIntoTable(username, password string) (int64, error) {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
+var db *sql.DB = nil
+
+func InitDatabase() {
+	var err error
+	db, err = sql.Open("sqlite3", "./db.sqlite")
 
 	if err != nil {
 		log.Fatal(err)
 	}
+}
 
+func InsertUserIntoTable(username, password string) (int64, error) {
 	result, err := db.Exec("INSERT INTO Users (name, password) VALUES (?, ?)", username, password)
 
 	if err != nil {
-		log.Fatal(err)
+		return -1, err
 	}
 
 	return result.LastInsertId()
 }
 
 func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (int64, error) {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	result, err := db.Exec("INSERT INTO Tasks (title, description, isDone, user_id) VALUES (?, ?, ?, ?)", title, description, isDone, userID)
 
 	if err != nil {
-		log.Fatal(err)
+		return -1, err
 	}
 
 	return result.LastInsertId()
 }
 
 func InsertCategoriesIntoTable(categories []string, taskID int64) error {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	for _, label := range categories {
-		_, err = db.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
+		_, err := db.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
-	return err
+	return nil
 }
 
-func SelectUserID(username string) int64 {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func SelectUserID(username string) (int64, error) {
 	result := db.QueryRow("SELECT id FROM Users WHERE name = ?", username)
 
 	var id int64
-	err = result.Scan(&id)
+	err := result.Scan(&id)
 
 	if err != nil {
-		log.Fatal(err)
+		return -1, err
 	}
-
-	return id
+	return id, nil
 }
 
-func SelectUserTasks(userID int64) []Task {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func SelectUserTasks(userID int64) ([]Task, error) {
 	result, err := db.Query("SELECT Tasks.id, title, description, isDone FROM Tasks WHERE user_id = ?", userID)
 
-	defer result.Close()
-
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	tasks := make([]Task, 0)
@@ -100,31 +73,26 @@ func SelectUserTasks(userID int64) []Task {
 		err := result.Scan(&task.ID, &task.Title, &task.Description, &task.IsDone)
 
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
-		task.Categories = append(task.Categories, SelectTaskCategories(int64(task.ID))...)
+		categories, err := SelectTaskCategories(int64(task.ID))
 
+		if err != nil {
+			return nil, err
+		}
+
+		task.Categories = append(task.Categories, categories...)
 		tasks = append(tasks, task)
 	}
-
-	return tasks
+	return tasks, nil
 }
 
-func SelectTaskCategories(taskID int64) []string {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func SelectTaskCategories(taskID int64) ([]string, error) {
 	result, err := db.Query("SELECT label FROM Categories WHERE task_id = ?", taskID)
 
-	defer result.Close()
-
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	categories := make([]string, 0)
@@ -134,50 +102,35 @@ func SelectTaskCategories(taskID int64) []string {
 		err := result.Scan(&label)
 
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		categories = append(categories, label)
 	}
-
-	return categories
+	return categories, nil
 }
 
-func UpdateTaskCategories(taskID int64, categories []string) {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Print(err)
-	}
-
-	_, err = db.Exec(`
+func UpdateTaskCategories(taskID int64, categories []string) error {
+	_, err := db.Exec(`
 		DELETE FROM Categories 
 		WHERE task_id = ?`,
 		taskID,
 	)
 
 	if err != nil {
-		log.Print(err)
+		return err
 	}
 
 	err = InsertCategoriesIntoTable(categories, taskID)
 
 	if err != nil {
-		log.Print(err)
+		return err
 	}
-
+	return nil
 }
 
-func UpdateUserTask(taskID int64, title, description string, isDone bool) {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
+func UpdateUserTask(taskID int64, title, description string, isDone bool) error {
+	_, err := db.Exec(`
 		UPDATE Tasks 
 		SET title = ?, description = ?, isDone = ? 
 		WHERE id = ?`,
@@ -185,27 +138,22 @@ func UpdateUserTask(taskID int64, title, description string, isDone bool) {
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func DeleteUserTask(taskID int64) {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
+func DeleteUserTask(taskID int64) error {
+	_, err := db.Exec(`
 		DELETE FROM Tasks
 		WHERE id = ?`,
 		taskID,
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 func CreateTables() {
@@ -215,14 +163,7 @@ func CreateTables() {
 }
 
 func createTableUsers() {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
+	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS Users (
 			id INTEGER  PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL UNIQUE,
@@ -236,14 +177,7 @@ func createTableUsers() {
 }
 
 func createTableTasks() {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
+	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS Tasks (
 			id INTEGER  PRIMARY KEY AUTOINCREMENT,
 			title TEXT NOT NULL,
@@ -260,14 +194,7 @@ func createTableTasks() {
 }
 
 func createTableCategories() {
-	db, err := sql.Open("sqlite3", "./db.sqlite")
-	defer db.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`
+	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS Categories (
 			id INTEGER  PRIMARY KEY AUTOINCREMENT,
 			label TEXT NOT NULL,
