@@ -12,6 +12,73 @@ function loadWebsite(){
     });
 }
 
+//Fetches and loads user specific tasks from the database
+function loadUserTasks(){
+    const URL = "http://localhost:8080/user1/tasks";
+
+    fetch(URL)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            data.forEach(task => {
+                if(task.categories == null){
+                    task.categories = [];
+                }
+                addTask(task.id, task.title, task.description, task.categories, task.is_done);
+            })
+        })
+        .catch(error => {
+            console.error("Fetch error:", error);
+        })
+}
+
+//Adds an event listener to submit new empty tasks and create a new set of data in the database
+function submitTask(){
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const task = input.value;
+
+        if(!task){
+            alert("Gib bitte eine Aufgabe an!");
+            return;
+        }
+
+        const URL = "/user1/tasks";
+
+        const task_data = {
+            title: task,
+            description: "",
+            is_done: false
+        }
+
+        fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(task_data)
+        })
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Response successful:", data);
+                addTask(data.id, task);
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    });
+}
+
 //Adds a task element with functionality and event listener into the list
 function addTask(id="", taskTitle="", description="", categories=[], isDone=false){
 
@@ -115,74 +182,7 @@ function addTask(id="", taskTitle="", description="", categories=[], isDone=fals
     addTags(categories_list_el, categories_input_el);
     toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, task_checker_el.getAttribute("checked"));
     deleteTask(task_delete_el, task_el);
-    toggleCheckbox(id, task_input_el.value, description_input_el.value, task_checker_el);
-}
-
-//Fetches and loads user specific tasks from the database
-function loadUserTasks(){
-    const URL = "http://localhost:8080/user1/tasks";
-
-    fetch(URL)
-        .then(response => {
-            if(!response.ok){
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then(data => {
-            data.forEach(task => {
-                if(task.categories == null){
-                    task.categories = [];
-                }
-                addTask(task.id, task.title, task.description, task.categories, task.is_done);
-            })
-        })
-        .catch(error => {
-            console.error("Fetch error:", error);
-        })
-}
-
-//Adds an event listener to submit new empty tasks and create a new set of data in the database
-function submitTask(){
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const task = input.value;
-
-        if(!task){
-            alert("Gib bitte eine Aufgabe an!");
-            return;
-        }
-
-        const URL = "/user1/tasks";
-
-        const data = {
-            title: task,
-            description: "",
-            is_done: false
-        }
-
-        fetch(URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => {
-                if(!response.ok){
-                    throw new Error("Network response was not ok");
-                }
-                addTask("", task)
-                return response.json();
-            })
-            .then(data => {
-                console.log("Response successful:", data);
-            })
-            .catch(error => {
-                console.error(error);
-            })
-    });
+    toggleCheckbox(id, task_input_el.value, description_input_el.value, categories_list_el, task_checker_el);
 }
 
 //Updates a task and makes changes in the database
@@ -255,12 +255,14 @@ function removeTag(element){
     element.parentElement.remove();
 }
 
+//Disables deletion of category tags
 function disableTagDeletion(tags){
     tags.forEach(tag => {
         tag.removeAttribute("onclick");
     })
 }
 
+//Enables deletion of category tags
 function enableTagDeletion(tags){
     tags.forEach(tag => {
         tag.setAttribute("onclick", "removeTag(this)");
@@ -308,7 +310,7 @@ function deleteTask(task_delete_el, task_el){
 }
 
 //Adds an event listener to toggle and mark the checkbox of tasks + update in database
-function toggleCheckbox(id, title, description, task_checker_el){
+function toggleCheckbox(id, title, description, categories_list_el, task_checker_el){
     task_checker_el.addEventListener("click", () => {
         if(task_checker_el.getAttribute("src") === "/img/checked.png"){
             task_checker_el.setAttribute("src", "/img/unchecked.png");
@@ -317,6 +319,6 @@ function toggleCheckbox(id, title, description, task_checker_el){
             task_checker_el.setAttribute("src", "/img/checked.png");
             task_checker_el.setAttribute("checked", "true");
         }
-        updateTask(id, title, description, task_checker_el.getAttribute("checked"))
+        updateTask(id, title, description, getTags(categories_list_el), task_checker_el.getAttribute("checked"))
     })
 }

@@ -44,6 +44,7 @@ func postTasks(ctx *gin.Context) {
 
 	userID := SelectUserID(user)
 	taskID, err := InsertTaskIntoTable(newTask.Title, newTask.Description, newTask.IsDone, userID)
+	newTask.ID = int(taskID)
 
 	if err != nil {
 		log.Fatal(err)
