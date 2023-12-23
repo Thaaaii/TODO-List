@@ -1,29 +1,11 @@
-package backend
+package models
 
-import (
-	"database/sql"
-	"log"
-)
-
-var db *sql.DB = nil
-
-func InitDatabase() {
-	var err error
-	db, err = sql.Open("sqlite3", "./db.sqlite")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func InsertUserIntoTable(username, password string) (int64, error) {
-	result, err := db.Exec("INSERT INTO Users (name, password) VALUES (?, ?)", username, password)
-
-	if err != nil {
-		return -1, err
-	}
-
-	return result.LastInsertId()
+type Task struct {
+	ID          int      `json:"id"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Categories  []string `json:"categories"`
+	IsDone      bool     `json:"is_done"`
 }
 
 func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (int64, error) {
@@ -45,18 +27,6 @@ func InsertCategoriesIntoTable(categories []string, taskID int64) error {
 		}
 	}
 	return nil
-}
-
-func SelectUserID(username string) (int64, error) {
-	result := db.QueryRow("SELECT id FROM Users WHERE name = ?", username)
-
-	var id int64
-	err := result.Scan(&id)
-
-	if err != nil {
-		return -1, err
-	}
-	return id, nil
 }
 
 func SelectUserTasks(userID int64) ([]Task, error) {
@@ -154,56 +124,4 @@ func DeleteUserTask(taskID int64) error {
 		return err
 	}
 	return nil
-}
-
-func CreateTables() {
-	createTableUsers()
-	createTableTasks()
-	createTableCategories()
-}
-
-func createTableUsers() {
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS Users (
-			id INTEGER  PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL UNIQUE,
-			password TEXT NOT NULL
-		)
-	`)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func createTableTasks() {
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS Tasks (
-			id INTEGER  PRIMARY KEY AUTOINCREMENT,
-			title TEXT NOT NULL,
-			description TEXT,
-			isDone BOOLEAN NOT NULL CHECK (isDone in (0, 1)),
-			user_id INTEGER NOT NULL,
-		    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
-		)
-	`)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func createTableCategories() {
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS Categories (
-			id INTEGER  PRIMARY KEY AUTOINCREMENT,
-			label TEXT NOT NULL,
-			task_id INTEGER NOT NULL,
-		    FOREIGN KEY (task_id) REFERENCES Tasks(id) ON DELETE CASCADE
-		)
-	`)
-
-	if err != nil {
-		log.Fatal(err)
-	}
 }

@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"github.com/Thaaaii/TODO-List/models"
 	"log"
 	"net/http"
 	"strconv"
@@ -31,9 +32,9 @@ func InitServer() {
 }
 
 func getTasks(ctx *gin.Context) {
-	var userTasks []Task
+	var userTasks []models.Task
 	user := ctx.Param("user")
-	userID, err := SelectUserID(user)
+	userID, err := models.SelectUserID(user)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -42,7 +43,7 @@ func getTasks(ctx *gin.Context) {
 		return
 	}
 
-	userTasks, err = SelectUserTasks(userID)
+	userTasks, err = models.SelectUserTasks(userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -56,7 +57,7 @@ func getTasks(ctx *gin.Context) {
 
 func postTasks(ctx *gin.Context) {
 	user := ctx.Param("user")
-	var newTask Task
+	var newTask models.Task
 
 	if err := ctx.BindJSON(&newTask); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -65,7 +66,7 @@ func postTasks(ctx *gin.Context) {
 		return
 	}
 
-	userID, err := SelectUserID(user)
+	userID, err := models.SelectUserID(user)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -74,7 +75,7 @@ func postTasks(ctx *gin.Context) {
 		return
 	}
 
-	taskID, err := InsertTaskIntoTable(newTask.Title, newTask.Description, newTask.IsDone, userID)
+	taskID, err := models.InsertTaskIntoTable(newTask.Title, newTask.Description, newTask.IsDone, userID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -84,7 +85,7 @@ func postTasks(ctx *gin.Context) {
 	}
 
 	newTask.ID = int(taskID)
-	err = InsertCategoriesIntoTable(newTask.Categories, taskID)
+	err = models.InsertCategoriesIntoTable(newTask.Categories, taskID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -106,7 +107,7 @@ func patchTask(ctx *gin.Context) {
 		return
 	}
 
-	var updatedTask Task
+	var updatedTask models.Task
 
 	if err = ctx.BindJSON(&updatedTask); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -115,7 +116,7 @@ func patchTask(ctx *gin.Context) {
 		return
 	}
 
-	err = UpdateUserTask(taskID, updatedTask.Title, updatedTask.Description, updatedTask.IsDone)
+	err = models.UpdateUserTask(taskID, updatedTask.Title, updatedTask.Description, updatedTask.IsDone)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -124,7 +125,7 @@ func patchTask(ctx *gin.Context) {
 		return
 	}
 
-	err = UpdateTaskCategories(taskID, updatedTask.Categories)
+	err = models.UpdateTaskCategories(taskID, updatedTask.Categories)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -148,7 +149,7 @@ func deleteTask(ctx *gin.Context) {
 		return
 	}
 
-	err = DeleteUserTask(taskID)
+	err = models.DeleteUserTask(taskID)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
