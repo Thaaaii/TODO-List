@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <link rel="stylesheet" href="/login-static/login.css">
+</head>
+<body>
+
+    <div class = "hero">
+        <div class = "form-box">
+            <div class="button-box">
+                <div id="btn"></div>
+                <button type="button" class="toggle-btn" onclick="setLogin()">Login</button>
+                <button type="button" class="toggle-btn" onclick="setRegister()">Register</button>
+            </div>
+            <form id="login" class="input-group">
+                <input type="text" class="input-field" placeholder="Nutzername" required>
+                <input type="text" class="input-field" placeholder="Passwort" required>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+            <form id="register" class="input-group">
+                <input type="text" class="input-field" placeholder="Nutzername" required>
+                <input type="text" class="input-field" placeholder="Passwort" required>
+                <button type="submit" class="submit-btn">Registrieren</button>
+            </form>
+        </div>
+    </div>
+
+<script src="/login-static/login.js"></script>
+
+</body>
+</html>
