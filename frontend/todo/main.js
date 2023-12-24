@@ -180,7 +180,7 @@ function addTask(id="", taskTitle="", description="", categories=[], isDone=fals
     input.value = "";
 
     addTags(categories_list_el, categories_input_el);
-    toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, task_checker_el.getAttribute("checked"));
+    toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, task_checker_el);
     deleteTask(task_delete_el, task_el);
     toggleCheckbox(id, task_input_el.value, description_input_el.value, categories_list_el, task_checker_el);
 }
@@ -270,7 +270,7 @@ function enableTagDeletion(tags){
 }
 
 //Adds an event listener to toggle between edit and static display. Changes update the database
-function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, is_done){
+function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, task_checker_el){
     task_edit_el.addEventListener("click", () => {
         if(task_edit_el.innerText.toLocaleLowerCase() === "bearbeiten"){
             task_input_el.removeAttribute("readonly");
@@ -285,7 +285,7 @@ function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categ
             categories_input_el.setAttribute("readonly", "readonly");
             disableTagDeletion(categories_list_el.querySelectorAll("i"));
             task_edit_el.innerText = "Bearbeiten";
-            updateTask(id, task_input_el.value, description_input_el.value, getTags(categories_list_el), is_done);
+            updateTask(id, task_input_el.value, description_input_el.value, getTags(categories_list_el), task_checker_el.getAttribute("checked"));
         }
     })
 }

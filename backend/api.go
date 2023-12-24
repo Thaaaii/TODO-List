@@ -12,12 +12,18 @@ import (
 func InitServer() {
 	router := gin.Default()
 
-	router.LoadHTMLFiles("frontend/index.html")
+	router.LoadHTMLFiles("frontend/todo/index.html", "frontend/login/login.html")
 	router.Static("img", "./img")
-	router.Static("/static", "./frontend")
+	router.Static("/static", "./frontend/todo")
+	router.Static("/login-static", "./frontend/login")
 	router.GET("/todo-list/:user", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{
 			"title": "TODO-Liste",
+		})
+	})
+	router.GET("login", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "login.html", gin.H{
+			"title": "Login",
 		})
 	})
 
