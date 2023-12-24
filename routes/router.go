@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func InitServer() {
+func InitRouter() {
 	router := gin.Default()
 
 	router.LoadHTMLFiles("frontend/todo/index.html", "frontend/login/login.html")
@@ -24,6 +24,10 @@ func InitServer() {
 			"title": "Login",
 		})
 	})
+
+	router.POST("/user", controller.PostUser)
+
+	router.POST("/login", controller.Login)
 
 	router.GET("/:user/tasks", controller.GetTasks)
 	router.POST("/:user/tasks", controller.PostTasks)

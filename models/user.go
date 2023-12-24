@@ -1,6 +1,9 @@
 package models
 
-import "github.com/Thaaaii/TODO-List/database"
+import (
+	"github.com/Thaaaii/TODO-List/database"
+	"log"
+)
 
 type User struct {
 	ID       int    `json:"id"`
@@ -12,6 +15,7 @@ func InsertUserIntoTable(username, password string) (int64, error) {
 	result, err := database.DB.Exec("INSERT INTO Users (name, password) VALUES (?, ?)", username, password)
 
 	if err != nil {
+		log.Fatal(err, username)
 		return -1, err
 	}
 

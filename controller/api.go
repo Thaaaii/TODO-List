@@ -8,6 +8,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func PostUser(ctx *gin.Context) {
+	var newUser models.User
+
+	if err := ctx.BindJSON(&newUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	_, err := models.InsertUserIntoTable(newUser.Name, newUser.Password)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Task could not be inserted",
+		})
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusCreated, newUser)
+}
+
+func Login(ctx *gin.Context) {
+
+}
+
 func GetTasks(ctx *gin.Context) {
 	var userTasks []models.Task
 	user := ctx.Param("user")
