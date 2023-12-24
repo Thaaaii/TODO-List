@@ -4,11 +4,10 @@ const toggleOptions = document.getElementById("btn");
 const loginUsernameInput = document.getElementById("login-username");
 const loginPasswordInput = document.getElementById("login-password");
 const loginSubmitButton = loginForm.getElementsByClassName("submit-btn")[0];
-const registerUsernameInput = document.getElementById("register-username");
-const registerPasswordInput = document.getElementById("register-password");
+
 const registerSubmitButton = registerForm.getElementsByClassName("submit-btn")[0];
 
-registerUser(registerUsernameInput.value, registerPasswordInput.value);
+registerUser();
 
 function setRegister(){
     loginForm.style.left = "-400px";
@@ -22,15 +21,17 @@ function setLogin(){
     toggleOptions.style.left = "0";
 }
 
-function registerUser(registerUsernameInput, registerPasswordInput){
+function registerUser(){
+
     registerSubmitButton.addEventListener("click", (e) =>{
         e.preventDefault();
 
-        const URL = "http://localhost:8080/user";
-
+        const registerUsernameInput = document.getElementById("register-username");
+        const registerPasswordInput = document.getElementById("register-password");
+        const URL = "http://localhost:8080/register";
         const user = {
             id: 0,
-            username: registerUsernameInput.value,
+            name: registerUsernameInput.value,
             password: registerPasswordInput.value,
         }
 
@@ -46,6 +47,7 @@ function registerUser(registerUsernameInput, registerPasswordInput){
                     throw new Error("Network response was not ok");
                 }
                 setLogin();
+                alert("Nutzer wurde erstellt. Melde dich nun an!")
                 return response.json();
             })
             .then(data => {
@@ -54,6 +56,7 @@ function registerUser(registerUsernameInput, registerPasswordInput){
             .catch(error => {
                 alert("Nutzer existiert bereits")
             })
+
     })
 }
 

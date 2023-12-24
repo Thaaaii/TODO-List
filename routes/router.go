@@ -25,8 +25,7 @@ func InitRouter() {
 		})
 	})
 
-	router.POST("/user", controller.PostUser)
-
+	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
 
 	router.GET("/:user/tasks", controller.GetTasks)

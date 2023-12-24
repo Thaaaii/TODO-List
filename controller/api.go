@@ -8,17 +8,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PostUser(ctx *gin.Context) {
+func Register(ctx *gin.Context) {
 	var newUser models.User
+	var err error
 
-	if err := ctx.BindJSON(&newUser); err != nil {
+	if err = ctx.BindJSON(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	_, err := models.InsertUserIntoTable(newUser.Name, newUser.Password)
+	newUser.Password, err = models.HashPassword(newUser.Password)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	_, err = models.InsertUserIntoTable(newUser.Name, newUser.Password)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -31,7 +41,26 @@ func PostUser(ctx *gin.Context) {
 }
 
 func Login(ctx *gin.Context) {
+	var user models.User
 
+	if err := ctx.BindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	token, err := models.LoginCheck(user.Name, user.Password)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "username or password is incorrect",
+		})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
 }
 
 func GetTasks(ctx *gin.Context) {
