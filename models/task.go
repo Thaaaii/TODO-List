@@ -1,5 +1,7 @@
 package models
 
+import "github.com/Thaaaii/TODO-List/database"
+
 type Task struct {
 	ID          int      `json:"id"`
 	Title       string   `json:"title"`
@@ -9,7 +11,7 @@ type Task struct {
 }
 
 func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (int64, error) {
-	result, err := db.Exec("INSERT INTO Tasks (title, description, isDone, user_id) VALUES (?, ?, ?, ?)", title, description, isDone, userID)
+	result, err := database.DB.Exec("INSERT INTO Tasks (title, description, isDone, user_id) VALUES (?, ?, ?, ?)", title, description, isDone, userID)
 
 	if err != nil {
 		return -1, err
@@ -20,7 +22,7 @@ func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (
 
 func InsertCategoriesIntoTable(categories []string, taskID int64) error {
 	for _, label := range categories {
-		_, err := db.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
+		_, err := database.DB.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
 
 		if err != nil {
 			return err
@@ -30,7 +32,7 @@ func InsertCategoriesIntoTable(categories []string, taskID int64) error {
 }
 
 func SelectUserTasks(userID int64) ([]Task, error) {
-	result, err := db.Query("SELECT Tasks.id, title, description, isDone FROM Tasks WHERE user_id = ?", userID)
+	result, err := database.DB.Query("SELECT Tasks.id, title, description, isDone FROM Tasks WHERE user_id = ?", userID)
 
 	if err != nil {
 		return nil, err
@@ -59,7 +61,7 @@ func SelectUserTasks(userID int64) ([]Task, error) {
 }
 
 func SelectTaskCategories(taskID int64) ([]string, error) {
-	result, err := db.Query("SELECT label FROM Categories WHERE task_id = ?", taskID)
+	result, err := database.DB.Query("SELECT label FROM Categories WHERE task_id = ?", taskID)
 
 	if err != nil {
 		return nil, err
@@ -81,7 +83,7 @@ func SelectTaskCategories(taskID int64) ([]string, error) {
 }
 
 func UpdateTaskCategories(taskID int64, categories []string) error {
-	_, err := db.Exec(`
+	_, err := database.DB.Exec(`
 		DELETE FROM Categories 
 		WHERE task_id = ?`,
 		taskID,
@@ -100,7 +102,7 @@ func UpdateTaskCategories(taskID int64, categories []string) error {
 }
 
 func UpdateUserTask(taskID int64, title, description string, isDone bool) error {
-	_, err := db.Exec(`
+	_, err := database.DB.Exec(`
 		UPDATE Tasks 
 		SET title = ?, description = ?, isDone = ? 
 		WHERE id = ?`,
@@ -114,7 +116,7 @@ func UpdateUserTask(taskID int64, title, description string, isDone bool) error 
 }
 
 func DeleteUserTask(taskID int64) error {
-	_, err := db.Exec(`
+	_, err := database.DB.Exec(`
 		DELETE FROM Tasks
 		WHERE id = ?`,
 		taskID,

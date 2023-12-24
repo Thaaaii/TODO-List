@@ -1,43 +1,14 @@
-package backend
+package controller
 
 import (
 	"github.com/Thaaaii/TODO-List/models"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func InitServer() {
-	router := gin.Default()
-
-	router.LoadHTMLFiles("frontend/todo/index.html", "frontend/login/login.html")
-	router.Static("img", "./img")
-	router.Static("/static", "./frontend/todo")
-	router.Static("/login-static", "./frontend/login")
-	router.GET("/todo-list/:user", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "TODO-Liste",
-		})
-	})
-	router.GET("login", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "login.html", gin.H{
-			"title": "Login",
-		})
-	})
-
-	router.GET("/:user/tasks", getTasks)
-	router.POST("/:user/tasks", postTasks)
-	router.PATCH("/todo-list/:user/tasks/:taskID", patchTask)
-	router.DELETE("/todo-list/:user/tasks/:taskID", deleteTask)
-
-	if err := router.Run("localhost:8080"); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func getTasks(ctx *gin.Context) {
+func GetTasks(ctx *gin.Context) {
 	var userTasks []models.Task
 	user := ctx.Param("user")
 	userID, err := models.SelectUserID(user)
@@ -61,7 +32,7 @@ func getTasks(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, userTasks)
 }
 
-func postTasks(ctx *gin.Context) {
+func PostTasks(ctx *gin.Context) {
 	user := ctx.Param("user")
 	var newTask models.Task
 
@@ -103,7 +74,7 @@ func postTasks(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusCreated, newTask)
 }
 
-func patchTask(ctx *gin.Context) {
+func PatchTask(ctx *gin.Context) {
 	taskID, err := strconv.ParseInt(ctx.Param("taskID"), 10, 64)
 
 	if err != nil {
@@ -145,7 +116,7 @@ func patchTask(ctx *gin.Context) {
 	})
 }
 
-func deleteTask(ctx *gin.Context) {
+func DeleteTask(ctx *gin.Context) {
 	taskID, err := strconv.ParseInt(ctx.Param("taskID"), 10, 64)
 
 	if err != nil {

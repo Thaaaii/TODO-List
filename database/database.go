@@ -1,15 +1,15 @@
-package models
+package database
 
 import (
 	"database/sql"
 	"log"
 )
 
-var db *sql.DB = nil
+var DB *sql.DB = nil
 
 func InitDatabase() {
 	var err error
-	db, err = sql.Open("sqlite3", "./models/db.sqlite")
+	DB, err = sql.Open("sqlite3", "./database/db.sqlite")
 
 	if err != nil {
 		log.Fatal(err)
@@ -23,7 +23,7 @@ func CreateTables() {
 }
 
 func createTableUsers() {
-	_, err := db.Exec(`
+	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS Users (
 			id INTEGER  PRIMARY KEY AUTOINCREMENT,
 			name TEXT NOT NULL UNIQUE,
@@ -37,7 +37,7 @@ func createTableUsers() {
 }
 
 func createTableTasks() {
-	_, err := db.Exec(`
+	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS Tasks (
 			id INTEGER  PRIMARY KEY AUTOINCREMENT,
 			title TEXT NOT NULL,
@@ -54,7 +54,7 @@ func createTableTasks() {
 }
 
 func createTableCategories() {
-	_, err := db.Exec(`
+	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS Categories (
 			id INTEGER  PRIMARY KEY AUTOINCREMENT,
 			label TEXT NOT NULL,

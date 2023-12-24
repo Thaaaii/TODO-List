@@ -1,5 +1,7 @@
 package models
 
+import "github.com/Thaaaii/TODO-List/database"
+
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
@@ -7,7 +9,7 @@ type User struct {
 }
 
 func InsertUserIntoTable(username, password string) (int64, error) {
-	result, err := db.Exec("INSERT INTO Users (name, password) VALUES (?, ?)", username, password)
+	result, err := database.DB.Exec("INSERT INTO Users (name, password) VALUES (?, ?)", username, password)
 
 	if err != nil {
 		return -1, err
@@ -17,7 +19,7 @@ func InsertUserIntoTable(username, password string) (int64, error) {
 }
 
 func SelectUserID(username string) (int64, error) {
-	result := db.QueryRow("SELECT id FROM Users WHERE name = ?", username)
+	result := database.DB.QueryRow("SELECT id FROM Users WHERE name = ?", username)
 
 	var id int64
 	err := result.Scan(&id)
