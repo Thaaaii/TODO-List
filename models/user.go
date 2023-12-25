@@ -30,7 +30,7 @@ func LoginCheck(username, password string) (string, error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+	if err != nil {
 		return "", err
 	}
 

@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/Thaaaii/TODO-List/models"
 	"github.com/Thaaaii/TODO-List/utils"
 	"github.com/dgrijalva/jwt-go"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -61,16 +64,23 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"token": token,
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:    "jwt",
+		Value:   token,
+		Expires: time.Now().Add(60 * time.Minute),
 	})
-
-	//ctx.Redirect(http.StatusFound, "/todo-list/"+user.Name)
 }
 
 func AuthenticationMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		tokenString := utils.ExtractToken(ctx)
+		//neue Extraction Funktion einfügen
+		tokenString, err := ctx.Cookie("jwt")
+		if err != nil {
+			ctx.String(http.StatusUnauthorized, "Unauthorized")
+			ctx.Abort()
+			return
+		}
+
 		token, err := utils.TokenValid(ctx, tokenString)
 
 		if err != nil {
@@ -78,11 +88,12 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		ctx.Request.Cookie("jwtToken")
+
 		var username string
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			username = claims["username"].(string)
+			fmt.Println(claims["username"].(string))
 		} else {
 			ctx.String(http.StatusInternalServerError, "Claims could not be extracted")
 			ctx.Abort()

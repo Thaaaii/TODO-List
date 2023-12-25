@@ -82,42 +82,10 @@ function loginUser(){
                 if(!response.ok){
                     throw new Error("Network response was not ok");
                 }
-                return response.json();
-            })
-            .then(data => {
-                localStorage.setItem("jwtToken", data["token"]);
-                authenticatedRedirection();
-            })
-            .catch(() => {
-                alert("Nutzer konnte nicht angemeldet werden");
-            })
-    })
-}
-
-function authenticatedRedirection(){
-
-    const token = localStorage.getItem("jwtToken")
-    const URL = "http://localhost:8080/todo-list/" + loginUsernameInput.value
-
-    if(token){
-        fetch(URL, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`
-            },
-        })
-            .then(response => {
-                if(!response.ok){
-                    throw new Error("Network response was not ok");
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
+                window.location.href = "http://localhost:8080/todo-list/" + loginUsernameInput.value;
             })
             .catch(error => {
-                console.log(token);
-                console.log(error);
+                alert("Nutzer konnte nicht angemeldet werden")
             })
-    }
+    })
 }
