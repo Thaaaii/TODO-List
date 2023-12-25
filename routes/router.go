@@ -14,7 +14,7 @@ func InitRouter() {
 	router.Static("img", "./img")
 	router.Static("/static", "./frontend/todo")
 	router.Static("/login-static", "./frontend/login")
-	router.GET("/todo-list/:user", func(ctx *gin.Context) {
+	router.GET("/todo-list/:user", controller.AuthenticationMiddleware(), func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{
 			"title": "TODO-Liste",
 		})
@@ -24,9 +24,8 @@ func InitRouter() {
 			"title": "Login",
 		})
 	})
-
-	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
+	router.POST("/register", controller.Register)
 
 	router.GET("/:user/tasks", controller.GetTasks)
 	router.POST("/:user/tasks", controller.PostTasks)

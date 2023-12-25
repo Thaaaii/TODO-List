@@ -2,6 +2,8 @@ package controller
 
 import (
 	"github.com/Thaaaii/TODO-List/models"
+	"github.com/Thaaaii/TODO-List/utils"
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"strconv"
 
@@ -56,11 +58,44 @@ func Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "username or password is incorrect",
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"token": token,
 	})
+
+	//ctx.Redirect(http.StatusFound, "/todo-list/"+user.Name)
+}
+
+func AuthenticationMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		tokenString := utils.ExtractToken(ctx)
+		token, err := utils.TokenValid(ctx, tokenString)
+
+		if err != nil {
+			ctx.String(http.StatusUnauthorized, "Unauthorized")
+			ctx.Abort()
+			return
+		}
+		ctx.Request.Cookie("jwtToken")
+		var username string
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			username = claims["username"].(string)
+		} else {
+			ctx.String(http.StatusInternalServerError, "Claims could not be extracted")
+			ctx.Abort()
+			return
+		}
+
+		if ctx.Param("user") != username {
+			ctx.String(http.StatusUnauthorized, "Unauthorized")
+			ctx.Abort()
+			return
+		}
+		ctx.Next()
+	}
 }
 
 func GetTasks(ctx *gin.Context) {

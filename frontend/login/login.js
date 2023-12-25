@@ -4,10 +4,12 @@ const toggleOptions = document.getElementById("btn");
 const loginUsernameInput = document.getElementById("login-username");
 const loginPasswordInput = document.getElementById("login-password");
 const loginSubmitButton = loginForm.getElementsByClassName("submit-btn")[0];
-
+const registerUsernameInput = document.getElementById("register-username");
+const registerPasswordInput = document.getElementById("register-password");
 const registerSubmitButton = registerForm.getElementsByClassName("submit-btn")[0];
 
 registerUser();
+loginUser();
 
 function setRegister(){
     loginForm.style.left = "-400px";
@@ -26,8 +28,6 @@ function registerUser(){
     registerSubmitButton.addEventListener("click", (e) =>{
         e.preventDefault();
 
-        const registerUsernameInput = document.getElementById("register-username");
-        const registerPasswordInput = document.getElementById("register-password");
         const URL = "http://localhost:8080/register";
         const user = {
             id: 0,
@@ -60,6 +60,64 @@ function registerUser(){
     })
 }
 
-function login(){
+function loginUser(){
+    loginSubmitButton.addEventListener("click", (e) => {
+        e.preventDefault();
 
+        const URL = "http://localhost:8080/login";
+        const user = {
+            id: 0,
+            name: loginUsernameInput.value,
+            password: loginPasswordInput.value,
+        }
+
+        fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(user)
+        })
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                localStorage.setItem("jwtToken", data["token"]);
+                authenticatedRedirection();
+            })
+            .catch(() => {
+                alert("Nutzer konnte nicht angemeldet werden");
+            })
+    })
+}
+
+function authenticatedRedirection(){
+
+    const token = localStorage.getItem("jwtToken")
+    const URL = "http://localhost:8080/todo-list/" + loginUsernameInput.value
+
+    if(token){
+        fetch(URL, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+        })
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.log(token);
+                console.log(error);
+            })
+    }
 }

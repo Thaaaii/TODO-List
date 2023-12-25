@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/Thaaaii/TODO-List/database"
+	"github.com/Thaaaii/TODO-List/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -33,8 +34,12 @@ func LoginCheck(username, password string) (string, error) {
 		return "", err
 	}
 
-	token, err := token.GenerateToken()
+	token, err := utils.GenerateToken(username)
 
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func InsertUserIntoTable(username, password string) (int64, error) {
@@ -60,7 +65,7 @@ func SelectUserID(username string) (int64, error) {
 }
 
 func SelectPassword(username string) (string, error) {
-	result := database.DB.QueryRow("SELECT password WHERE name = ?", username)
+	result := database.DB.QueryRow("SELECT password FROM Users WHERE name = ?", username)
 
 	var password string
 	err := result.Scan(&password)
