@@ -43,7 +43,7 @@ func createTableTasks() {
 			title TEXT NOT NULL,
 			description TEXT,
 			isDone BOOLEAN NOT NULL CHECK (isDone in (0, 1)),
-		    sequence INTEGER,
+		    sequence INTEGER DEFAULT 0,
 			user_id INTEGER NOT NULL,
 		    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 		)

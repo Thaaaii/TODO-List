@@ -94,7 +94,7 @@ function submitTask(){
             .catch(error => {
                 console.error(error);
             })
-        assignSequenceNumbers();
+        updateSequenceNumbers();
     });
 }
 
@@ -319,7 +319,6 @@ function deleteTask(task_delete_el, task_el){
 
         const URL = URL_Base + "todo-list/" + user + "/tasks/" + task_el.getAttribute("data-id");
         list_el.removeChild(task_el);
-        updateSequenceNumbers();
 
         fetch(URL, {method: "DELETE"})
             .then(response => {

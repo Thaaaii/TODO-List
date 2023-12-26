@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -71,7 +72,10 @@ func Login(ctx *gin.Context) {
 }
 
 func Logout(ctx *gin.Context) {
-
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:    "jwt",
+		Expires: time.Now(),
+	})
 }
 
 func AuthenticationMiddleware() gin.HandlerFunc {
@@ -116,6 +120,7 @@ func GetTasks(ctx *gin.Context) {
 	userID, err := models.SelectUserID(user)
 
 	if err != nil {
+		log.Fatal(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "User could not be found",
 		})
@@ -125,6 +130,7 @@ func GetTasks(ctx *gin.Context) {
 	userTasks, err = models.SelectUserTasks(userID)
 
 	if err != nil {
+		log.Fatal(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Tasks of the user could not be found",
 		})
