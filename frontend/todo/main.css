@@ -29,6 +29,20 @@ header{
     margin: 0 auto;
 }
 
+#logout{
+    width: 80px;
+    height: 30px;
+    float: right;
+    cursor: pointer;
+    margin: auto;
+    border: 0;
+    outline: none;
+    background: linear-gradient(to right, var(--pink), var(--purple));
+    border-radius: 30px;
+    color: #FFF;
+    font-weight: bold;
+}
+
 header h1{
     font-size: 2.5rem;
     font-weight: 300;

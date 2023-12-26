@@ -71,13 +71,6 @@ func Login(ctx *gin.Context) {
 	})
 }
 
-func Logout(ctx *gin.Context) {
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:    "jwt",
-		Expires: time.Now(),
-	})
-}
-
 func AuthenticationMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenString, err := ctx.Cookie("jwt")

@@ -22,7 +22,6 @@ func InitRouter() {
 	})
 	router.POST("/login", controller.Login)
 	router.POST("/register", controller.Register)
-	router.POST("/logout", controller.Logout)
 
 	protected := router.Group("todo-list")
 	protected.Use(controller.AuthenticationMiddleware())

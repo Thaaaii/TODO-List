@@ -7,6 +7,13 @@ const parts = currentURL.split("/").splice(2);
 const user = parts[2];
 const sortableList = document.querySelector("#tasks");
 
+// Adds an event listener to log out and redirect the current user to the login page
+document.querySelector("#logout").addEventListener("click", () => {
+    const URL = URL_Base + "todo-list/" + user + "/logout";
+    alert("Weiterleitung zum Login-Fenster");
+    window.location.href = URL_Base + "login";
+});
+
 loadWebsite();
 initSortableList();
 
