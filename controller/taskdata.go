@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+// GetTasks is a handler that processes GET requests. The handler queries all tasks of a specific user from
+// the database and returns it to the specific route.
 func GetTasks(ctx *gin.Context) {
 	var userTasks []models.Task
 	user := ctx.Param("user")
@@ -34,6 +36,8 @@ func GetTasks(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, userTasks)
 }
 
+// PostTasks is a handler that processes POST requests. The handler receives data from the frontend to create a new
+// task entry in the database.
 func PostTasks(ctx *gin.Context) {
 	user := ctx.Param("user")
 	var newTask models.Task
@@ -76,6 +80,8 @@ func PostTasks(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusCreated, newTask)
 }
 
+// PatchTask is a handler that processes PATCH requests. The handler receives updates about changes in tasks
+// to update the entry in the database.
 func PatchTask(ctx *gin.Context) {
 	taskID, err := strconv.ParseInt(ctx.Param("taskID"), 10, 64)
 
@@ -118,6 +124,8 @@ func PatchTask(ctx *gin.Context) {
 	})
 }
 
+// PatchTaskOrder is a handler that processes PATCH requests. The handler receives updates about changes in
+// task order and updates the database accordingly.
 func PatchTaskOrder(ctx *gin.Context) {
 	type Sequence struct {
 		SequenceNumber int `json:"sequenceNumber"`
@@ -155,6 +163,7 @@ func PatchTaskOrder(ctx *gin.Context) {
 	})
 }
 
+// DeleteTask is a handler that processes DELETE requests. The handler deletes specific entries in the database.
 func DeleteTask(ctx *gin.Context) {
 	taskID, err := strconv.ParseInt(ctx.Param("taskID"), 10, 64)
 

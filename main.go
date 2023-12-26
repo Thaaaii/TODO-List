@@ -8,6 +8,5 @@ import (
 
 func main() {
 	database.InitDatabase()
-	//database.CreateTables()
 	routes.InitRouter()
 }

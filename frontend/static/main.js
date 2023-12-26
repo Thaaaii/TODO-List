@@ -7,17 +7,17 @@ const parts = currentURL.split("/").splice(2);
 const user = parts[2];
 const sortableList = document.querySelector("#tasks");
 
-// Adds an event listener to log out and redirect the current user to the login page
+loadWebsite();
+initSortableList();
+
+// Adds an event listener to log out and redirect the current user to the login page.
 document.querySelector("#logout").addEventListener("click", () => {
     const URL = URL_Base + "todo-list/" + user + "/logout";
     alert("Weiterleitung zum Login-Fenster");
     window.location.href = URL_Base + "login";
 });
 
-loadWebsite();
-initSortableList();
-
-// Adds an event listener to execute tasks when the website is loaded
+// Adds an event listener to execute tasks when the website is loaded.
 function loadWebsite(){
     window.addEventListener("load", () =>{
         loadUserTasks();
@@ -25,7 +25,8 @@ function loadWebsite(){
     });
 }
 
-//Fetches and loads user specific tasks from the database
+// Fetches and loads user specific tasks from the database.
+// Sorts fetched tasks and inserts them in the correct order.
 function loadUserTasks(){
     const URL = URL_Base + "todo-list/" + user + "/tasks";
 
@@ -51,6 +52,7 @@ function loadUserTasks(){
         })
 }
 
+// Is a comparator to compare and sort tasks by the sequence number.
 function compareBySequenceNumber(a, b){
     if(a.sequenceNumber < b.sequenceNumber){
         return -1;
@@ -61,7 +63,7 @@ function compareBySequenceNumber(a, b){
     return 0;
 }
 
-//Adds an event listener to submit new empty tasks and create a new set of data in the database
+//Adds an event listener to submit new empty tasks and to create a new entry in the database
 function submitTask(){
     form.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -297,7 +299,7 @@ function enableTagDeletion(tags){
     })
 }
 
-//Adds an event listener to toggle between edit and static display. Changes update the database
+//Adds an event listener to toggle between edit and static display. Confirmed changes update the database accordingly.
 function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, task_checker_el){
     task_edit_el.addEventListener("click", () => {
         if(task_edit_el.innerText.toLocaleLowerCase() === "bearbeiten"){
@@ -391,7 +393,7 @@ function initSortableList(){
     sortableList.addEventListener("dragenter", e => e.preventDefault());
 }
 
-//Updates the task sequence numbers in the database
+//Updates the task sequence numbers for every task element in the database
 function updateSequenceNumbers(){
     assignSequenceNumbers();
     sortableList.querySelectorAll(".task").forEach((task) => {

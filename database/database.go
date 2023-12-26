@@ -7,6 +7,7 @@ import (
 
 var DB *sql.DB = nil
 
+// InitDatabase initializes the global database instance for further queries and requests.
 func InitDatabase() {
 	var err error
 	DB, err = sql.Open("sqlite3", "./database/db.sqlite")
@@ -16,12 +17,14 @@ func InitDatabase() {
 	}
 }
 
+// CreateTables creates all the tables that are necessary for the program
 func CreateTables() {
 	createTableUsers()
 	createTableTasks()
 	createTableCategories()
 }
 
+// createTableUsers creates the scheme for the users table
 func createTableUsers() {
 	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS Users (
@@ -36,6 +39,7 @@ func createTableUsers() {
 	}
 }
 
+// createTableTasks creates the scheme for the tasks table
 func createTableTasks() {
 	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS Tasks (
@@ -54,6 +58,7 @@ func createTableTasks() {
 	}
 }
 
+// createTableCategories creates the scheme for the categories table, which is needed for the tasks table
 func createTableCategories() {
 	_, err := DB.Exec(`
 		CREATE TABLE IF NOT EXISTS Categories (

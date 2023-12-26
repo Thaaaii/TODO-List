@@ -1,5 +1,4 @@
 const URL_Base = "http://localhost:8080/";
-
 const loginForm = document.getElementById("login");
 const registerForm = document.getElementById("register");
 const toggleOptions = document.getElementById("btn");
@@ -13,18 +12,21 @@ const registerSubmitButton = registerForm.getElementsByClassName("submit-btn")[0
 registerUser();
 loginUser();
 
+//changes the elements location to display the registration form
 function setRegister(){
     loginForm.style.left = "-400px";
     registerForm.style.left = "50px";
     toggleOptions.style.left = "110px";
 }
 
+//changes the elements location to display the login form
 function setLogin(){
     loginForm.style.left = "50px";
     registerForm.style.left = "450px";
     toggleOptions.style.left = "0";
 }
 
+//makes a POST request to create a user
 function registerUser(){
 
     registerSubmitButton.addEventListener("click", (e) =>{
@@ -62,6 +64,7 @@ function registerUser(){
     })
 }
 
+//makes a POST request to start a login process + redirection to the user specific todo-list if the request is successful
 function loginUser(){
     loginSubmitButton.addEventListener("click", (e) => {
         e.preventDefault();

@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// InitRouter initializes the router and configures the specific routes
 func InitRouter() {
 	router := gin.Default()
 

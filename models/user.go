@@ -6,12 +6,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// User defines a structs to contain all relevant details about users
 type User struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
+// HashPassword takes the password and generates a hashed version to return to the caller
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -21,6 +23,8 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
+// LoginCheck verifies the user by comparing the given password with the stored hashed password.
+// Also generates and returns a JWT token to the user
 func LoginCheck(username, password string) (string, error) {
 	hashedPassword, err := SelectPassword(username)
 
@@ -42,6 +46,7 @@ func LoginCheck(username, password string) (string, error) {
 	return token, nil
 }
 
+// InsertUserIntoTable defines a SQL statement to insert a new user into the table
 func InsertUserIntoTable(username, password string) (int64, error) {
 	result, err := database.DB.Exec("INSERT INTO Users (name, password) VALUES (?, ?)", username, password)
 
@@ -52,6 +57,7 @@ func InsertUserIntoTable(username, password string) (int64, error) {
 	return result.LastInsertId()
 }
 
+// SelectUserID queries the user id of a user by searching after the username (unique)
 func SelectUserID(username string) (int64, error) {
 	result := database.DB.QueryRow("SELECT id FROM Users WHERE name = ?", username)
 
@@ -64,6 +70,7 @@ func SelectUserID(username string) (int64, error) {
 	return id, nil
 }
 
+// SelectPassword queries the hashed password of a specified user
 func SelectPassword(username string) (string, error) {
 	result := database.DB.QueryRow("SELECT password FROM Users WHERE name = ?", username)
 

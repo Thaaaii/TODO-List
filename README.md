@@ -31,12 +31,13 @@ TODO-Liste als Webanwendung mit Basic HTML, CSS, Javascript im Frontend und Gola
 - Funktionalität des Codes mit Tests belegen
 - besseres Datenbankschema (Categories Tabelle überdenken)
 - bessere Code-Qualität, Refactoring
+- bessere Struktur und Konsistenz, Debugging Code entfernen
+- effizientere Lösungen finden, beispielsweise bei Modifikation von Aufgabenelementen
 - TODO-Listen teilen
 - Anwendung robuster und sicherer machen
 - Logging
 - Description Felder mit Größe des Inputs wachsen lassen/richtiges Wrapping für Texte
 - mehr Error-Nachrichten und Hinweise im Frontend in Abhängigkeit des Error Codes
-- bessere Struktur, Debugging Code entfernen
 - Nutzer löschen, Passwort ändern
 - hardcodierte (sensible) Daten in eine .env auslagern
 

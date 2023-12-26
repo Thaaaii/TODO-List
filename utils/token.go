@@ -20,6 +20,7 @@ func GenerateToken(username string) (string, error) {
 	return token.SignedString([]byte(tokenSecret))
 }
 
+// TokenValid checks whether a given token is valid
 func TokenValid(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

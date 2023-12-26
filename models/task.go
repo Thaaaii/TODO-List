@@ -4,6 +4,7 @@ import (
 	"github.com/Thaaaii/TODO-List/database"
 )
 
+// Task defines a structs to contain all relevant details about tasks
 type Task struct {
 	ID             int      `json:"id"`
 	Title          string   `json:"title"`
@@ -13,6 +14,7 @@ type Task struct {
 	SequenceNumber int      `json:"sequenceNumber"`
 }
 
+// InsertTaskIntoTable defines a SQL statement to insert tasks into the table
 func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (int64, error) {
 	result, err := database.DB.Exec("INSERT INTO Tasks (title, description, isDone, user_id) VALUES (?, ?, ?, ?)", title, description, isDone, userID)
 
@@ -23,6 +25,8 @@ func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (
 	return result.LastInsertId()
 }
 
+// InsertCategoriesIntoTable defines a SQL statement to insert categories into the table
+// and also links the categories to the corresponding task through a foreign key
 func InsertCategoriesIntoTable(categories []string, taskID int64) error {
 	for _, label := range categories {
 		_, err := database.DB.Exec("INSERT INTO Categories (label, task_id) VALUES (?, ?)", label, taskID)
@@ -34,6 +38,7 @@ func InsertCategoriesIntoTable(categories []string, taskID int64) error {
 	return nil
 }
 
+// SelectUserTasks queries all tasks of a specific user and returns them to the caller
 func SelectUserTasks(userID int64) ([]Task, error) {
 	result, err := database.DB.Query("SELECT Tasks.id, title, description, isDone, sequence FROM Tasks WHERE user_id = ?", userID)
 
@@ -63,6 +68,7 @@ func SelectUserTasks(userID int64) ([]Task, error) {
 	return tasks, nil
 }
 
+// SelectTaskCategories queries all categories of a specific task and returns them to the caller
 func SelectTaskCategories(taskID int64) ([]string, error) {
 	result, err := database.DB.Query("SELECT label FROM Categories WHERE task_id = ?", taskID)
 
@@ -85,6 +91,7 @@ func SelectTaskCategories(taskID int64) ([]string, error) {
 	return categories, nil
 }
 
+// UpdateTaskCategories deletes all current categories of a task and inserts the updated categories into the table
 func UpdateTaskCategories(taskID int64, categories []string) error {
 	_, err := database.DB.Exec(`
 		DELETE FROM Categories 
@@ -104,6 +111,7 @@ func UpdateTaskCategories(taskID int64, categories []string) error {
 	return nil
 }
 
+// UpdateUserTask updates a task of a user
 func UpdateUserTask(taskID int64, title, description string, isDone bool) error {
 	_, err := database.DB.Exec(`
 		UPDATE Tasks 
@@ -118,6 +126,7 @@ func UpdateUserTask(taskID int64, title, description string, isDone bool) error 
 	return nil
 }
 
+// UpdateUserTaskOrder updates the sequence number of a user task
 func UpdateUserTaskOrder(taskID, sequenceNumber int64) error {
 	_, err := database.DB.Exec(`
 		Update Tasks
@@ -132,6 +141,7 @@ func UpdateUserTaskOrder(taskID, sequenceNumber int64) error {
 	return nil
 }
 
+// DeleteUserTask deletes a user task selected by task ID
 func DeleteUserTask(taskID int64) error {
 	_, err := database.DB.Exec(`
 		DELETE FROM Tasks
