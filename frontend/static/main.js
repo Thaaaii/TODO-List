@@ -122,10 +122,10 @@ function addTask(id="", taskTitle="", description="", categories=[], isDone=fals
     //Checkbox of task element
     const task_checker_el = document.createElement("img");
     if(isDone) {
-        task_checker_el.src = "/img/checked.png";
+        task_checker_el.src = URL_Base + "img/checked.png";
         task_checker_el.setAttribute("checked", "true");
     }else{
-        task_checker_el.src = "/img/unchecked.png";
+        task_checker_el.src = URL_Base + "img/unchecked.png";
         task_checker_el.setAttribute("checked", "false");
     }
 

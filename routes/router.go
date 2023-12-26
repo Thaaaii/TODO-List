@@ -10,10 +10,9 @@ import (
 func InitRouter() {
 	router := gin.Default()
 
-	router.LoadHTMLFiles("frontend/todo/index.html", "frontend/login/login.html")
-	router.Static("img", "./img")
-	router.Static("/static", "./frontend/todo")
-	router.Static("/login-static", "./frontend/login")
+	router.LoadHTMLFiles("frontend/index.html", "frontend/login.html")
+	router.Static("/img", "./frontend/img")
+	router.Static("/static", "./frontend/static")
 
 	router.GET("login", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "login.html", gin.H{
