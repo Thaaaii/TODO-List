@@ -14,11 +14,7 @@ func InitRouter() {
 	router.Static("img", "./img")
 	router.Static("/static", "./frontend/todo")
 	router.Static("/login-static", "./frontend/login")
-	router.GET("/todo-list/:user", controller.AuthenticationMiddleware(), func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "TODO-Liste",
-		})
-	})
+
 	router.GET("login", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "login.html", gin.H{
 			"title": "Login",
@@ -26,11 +22,23 @@ func InitRouter() {
 	})
 	router.POST("/login", controller.Login)
 	router.POST("/register", controller.Register)
+	router.POST("/logout", controller.Logout)
 
-	router.GET("/:user/tasks", controller.GetTasks)
-	router.POST("/:user/tasks", controller.PostTasks)
-	router.PATCH("/todo-list/:user/tasks/:taskID", controller.PatchTask)
-	router.DELETE("/todo-list/:user/tasks/:taskID", controller.DeleteTask)
+	protected := router.Group("todo-list")
+	protected.Use(controller.AuthenticationMiddleware())
+
+	{
+		protected.GET("/:user", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "index.html", gin.H{
+				"title": "Todo-Liste",
+			})
+		})
+		protected.GET("/:user/tasks", controller.GetTasks)
+		protected.POST("/:user/tasks", controller.PostTasks)
+		protected.PATCH("/:user/tasks/:taskID", controller.PatchTask)
+		protected.PATCH("/:user/tasks/:taskID/order", controller.PatchTaskOrder)
+		protected.DELETE("/:user/tasks/:taskID", controller.DeleteTask)
+	}
 
 	if err := router.Run("localhost:8080"); err != nil {
 		log.Fatal(err)

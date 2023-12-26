@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -71,9 +70,12 @@ func Login(ctx *gin.Context) {
 	})
 }
 
+func Logout(ctx *gin.Context) {
+
+}
+
 func AuthenticationMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		//neue Extraction Funktion einfügen
 		tokenString, err := ctx.Cookie("jwt")
 		if err != nil {
 			ctx.String(http.StatusUnauthorized, "Unauthorized")
@@ -81,7 +83,7 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token, err := utils.TokenValid(ctx, tokenString)
+		token, err := utils.TokenValid(tokenString)
 
 		if err != nil {
 			ctx.String(http.StatusUnauthorized, "Unauthorized")
@@ -93,7 +95,6 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			username = claims["username"].(string)
-			fmt.Println(claims["username"].(string))
 		} else {
 			ctx.String(http.StatusInternalServerError, "Claims could not be extracted")
 			ctx.Abort()
@@ -208,6 +209,43 @@ func PatchTask(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "Task to update categories could not be found",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "ressource with ID " + ctx.Param("taskID") + " updated.",
+	})
+}
+
+func PatchTaskOrder(ctx *gin.Context) {
+	type Sequence struct {
+		SequenceNumber int `json:"sequenceNumber"`
+	}
+
+	taskID, err := strconv.ParseInt(ctx.Param("taskID"), 10, 64)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var sequence Sequence
+
+	if err = ctx.BindJSON(&sequence); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = models.UpdateUserTaskOrder(taskID, int64(sequence.SequenceNumber))
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Task to update could not be found",
 		})
 		return
 	}

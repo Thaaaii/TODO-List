@@ -9,15 +9,8 @@ TODO-Liste als Webanwendung mit Basic HTML, CSS, Javascript im Frontend und Gola
 
 ## Features
 
-## TODO 
-- Reihenfolge anpassen (eventuell in Datenbank abspeichern)
-- Nutzer erstellen
-- Login + Passwort-Hashing
-- API Aufrufe mit dynamischen URL
-- Frontend sollte noch unabhängig vom Backend funktionieren (speichert aber dementsprechend erstmal nichts)
-- Listen von Nutzern wirklich privat halten (unauthorisierter Zugriff wird noch nicht verhindert)
+## TODO
 - Kommentare und Dokumentation
-- URL (vor allem die Basis im Frontend) zu globalen Konstanten machen
 
 ## mögliche Verbesserungen
 - Services besser trennen? Docker Container

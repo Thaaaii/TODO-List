@@ -1,8 +1,14 @@
+const URL_Base = "http://localhost:8080/";
+const currentURL = window.location.href;
 const form = document.querySelector("#new-task-form");
 const input = document.querySelector("#new-task-input");
 const list_el = document.querySelector("#tasks");
+const parts = currentURL.split("/").splice(2);
+const user = parts[2];
+const sortableList = document.querySelector("#tasks");
 
-loadWebsite()
+loadWebsite();
+initSortableList();
 
 // Adds an event listener to execute tasks when the website is loaded
 function loadWebsite(){
@@ -14,7 +20,7 @@ function loadWebsite(){
 
 //Fetches and loads user specific tasks from the database
 function loadUserTasks(){
-    const URL = "http://localhost:8080/user1/tasks";
+    const URL = URL_Base + "todo-list/" + user + "/tasks";
 
     fetch(URL)
         .then(response => {
@@ -24,16 +30,28 @@ function loadUserTasks(){
             return response.json();
         })
         .then(data => {
+            data.sort(compareBySequenceNumber);
             data.forEach(task => {
                 if(task.categories == null){
                     task.categories = [];
                 }
                 addTask(task.id, task.title, task.description, task.categories, task.is_done);
             })
+            assignSequenceNumbers()
         })
         .catch(error => {
             console.error("Fetch error:", error);
         })
+}
+
+function compareBySequenceNumber(a, b){
+    if(a.sequenceNumber < b.sequenceNumber){
+        return -1;
+    }
+    if(a.sequenceNumber > b.sequenceNumber){
+        return 1;
+    }
+    return 0;
 }
 
 //Adds an event listener to submit new empty tasks and create a new set of data in the database
@@ -48,7 +66,7 @@ function submitTask(){
             return;
         }
 
-        const URL = "/user1/tasks";
+        const URL = URL_Base + "todo-list/" + user + "/tasks";
 
         const task_data = {
             title: task,
@@ -76,6 +94,7 @@ function submitTask(){
             .catch(error => {
                 console.error(error);
             })
+        assignSequenceNumbers();
     });
 }
 
@@ -86,6 +105,7 @@ function addTask(id="", taskTitle="", description="", categories=[], isDone=fals
     const task_el = document.createElement("div");
     task_el.classList.add("task");
     task_el.setAttribute("data-id", id);
+    task_el.setAttribute("draggable", "true");
 
     const task_content_el = document.createElement("div");
     task_content_el.classList.add("content");
@@ -180,6 +200,7 @@ function addTask(id="", taskTitle="", description="", categories=[], isDone=fals
     input.value = "";
 
     addTags(categories_list_el, categories_input_el);
+    addDraggableProperty(task_el);
     toggleEdit(id, task_edit_el, task_input_el, description_input_el, categories_list_el, categories_input_el, task_checker_el);
     deleteTask(task_delete_el, task_el);
     toggleCheckbox(id, task_input_el.value, description_input_el.value, categories_list_el, task_checker_el);
@@ -187,7 +208,7 @@ function addTask(id="", taskTitle="", description="", categories=[], isDone=fals
 
 //Updates a task and makes changes in the database
 function updateTask(id, title, description, tags, is_done){
-    const URL = "/todo-list/user1/tasks/" + id;
+    const URL = URL_Base + "todo-list/" + user + "/tasks/" + id;
 
     const data = {
         title: title,
@@ -277,6 +298,7 @@ function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categ
             description_input_el.removeAttribute("readonly");
             categories_input_el.removeAttribute("readonly");
             enableTagDeletion(categories_list_el.querySelectorAll("i"));
+            disableDragging();
             task_input_el.focus();
             task_edit_el.innerText = "Speichern";
         }else{
@@ -284,6 +306,7 @@ function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categ
             description_input_el.setAttribute("readonly", "readonly");
             categories_input_el.setAttribute("readonly", "readonly");
             disableTagDeletion(categories_list_el.querySelectorAll("i"));
+            enableDragging();
             task_edit_el.innerText = "Bearbeiten";
             updateTask(id, task_input_el.value, description_input_el.value, getTags(categories_list_el), task_checker_el.getAttribute("checked"));
         }
@@ -294,14 +317,15 @@ function toggleEdit(id, task_edit_el, task_input_el, description_input_el, categ
 function deleteTask(task_delete_el, task_el){
     task_delete_el.addEventListener("click", () => {
 
-        const URL = "/todo-list/user1/tasks/" + task_el.getAttribute("data-id");
+        const URL = URL_Base + "todo-list/" + user + "/tasks/" + task_el.getAttribute("data-id");
+        list_el.removeChild(task_el);
+        updateSequenceNumbers();
 
         fetch(URL, {method: "DELETE"})
             .then(response => {
                 if(!response.ok){
                     throw new Error("Network response was not ok");
                 }
-                list_el.removeChild(task_el);
             })
             .catch(error => {
                 console.log(error);
@@ -321,4 +345,97 @@ function toggleCheckbox(id, title, description, categories_list_el, task_checker
         }
         updateTask(id, title, description, getTags(categories_list_el), task_checker_el.getAttribute("checked"))
     })
+}
+
+//Toggles the class of the currently selected task for dragging functionality
+function addDraggableProperty(task){
+    task.addEventListener("dragstart", () => {
+        setTimeout(() => task.classList.add("dragging"), 0);
+    });
+    task.addEventListener("dragend", () => {
+        task.classList.remove("dragging");
+        updateSequenceNumbers();
+    });
+}
+
+//Retrieves the element behind the position we insert to
+function getDragAfterElement(y){
+    const draggableElements = [...sortableList.querySelectorAll(".task:not(.dragging)")];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top -box.height / 2;
+        if(offset < 0 && offset > closest.offset){
+            return {offset: offset, element: child}
+        }else{
+            return closest
+        }
+    }, {offset: Number.NEGATIVE_INFINITY}).element;
+}
+
+//Initializes and enables event listener to add drag and drop functionality for the todo-list
+function initSortableList(){
+    sortableList.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(e.clientY);
+        const draggable = sortableList.querySelector(".dragging");
+        sortableList.insertBefore(draggable, afterElement)
+    });
+
+    sortableList.addEventListener("dragenter", e => e.preventDefault());
+}
+
+//Updates the task sequence numbers in the database
+function updateSequenceNumbers(){
+    assignSequenceNumbers();
+    sortableList.querySelectorAll(".task").forEach((task) => {
+
+        const URL = URL_Base  + "todo-list/" + user + "/tasks/" + task.getAttribute("data-id") + "/order";
+        const data = {
+            sequenceNumber: parseInt(task.getAttribute("order"))
+        }
+
+        fetch(URL, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Response successful:", data);
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    });
+}
+
+//Assigns each task element a sequence number for sorting
+function assignSequenceNumbers(){
+    const tasks = sortableList.querySelectorAll(".task");
+
+    for(const [index, task] of tasks.entries()){
+        task.setAttribute("order", index.toString())
+    }
+}
+
+//Disables the ability to drag task elements
+function disableDragging(){
+    sortableList.querySelectorAll(".task").forEach((task) => {
+        task.setAttribute("draggable", "false");
+    });
+}
+
+//Enables the ability to drag task elements
+function enableDragging(){
+    sortableList.querySelectorAll(".task").forEach((task) => {
+        task.setAttribute("draggable", "true");
+    });
 }

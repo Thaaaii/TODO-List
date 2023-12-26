@@ -1,13 +1,16 @@
 package models
 
-import "github.com/Thaaaii/TODO-List/database"
+import (
+	"github.com/Thaaaii/TODO-List/database"
+)
 
 type Task struct {
-	ID          int      `json:"id"`
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	Categories  []string `json:"categories"`
-	IsDone      bool     `json:"is_done"`
+	ID             int      `json:"id"`
+	Title          string   `json:"title"`
+	Description    string   `json:"description"`
+	Categories     []string `json:"categories"`
+	IsDone         bool     `json:"is_done"`
+	SequenceNumber int      `json:"sequenceNumber"`
 }
 
 func InsertTaskIntoTable(title, description string, isDone bool, userID int64) (int64, error) {
@@ -32,7 +35,7 @@ func InsertCategoriesIntoTable(categories []string, taskID int64) error {
 }
 
 func SelectUserTasks(userID int64) ([]Task, error) {
-	result, err := database.DB.Query("SELECT Tasks.id, title, description, isDone FROM Tasks WHERE user_id = ?", userID)
+	result, err := database.DB.Query("SELECT Tasks.id, title, description, isDone, sequence FROM Tasks WHERE user_id = ?", userID)
 
 	if err != nil {
 		return nil, err
@@ -42,7 +45,7 @@ func SelectUserTasks(userID int64) ([]Task, error) {
 
 	for result.Next() {
 		var task Task
-		err := result.Scan(&task.ID, &task.Title, &task.Description, &task.IsDone)
+		err := result.Scan(&task.ID, &task.Title, &task.Description, &task.IsDone, &task.SequenceNumber)
 
 		if err != nil {
 			return nil, err
@@ -107,6 +110,20 @@ func UpdateUserTask(taskID int64, title, description string, isDone bool) error 
 		SET title = ?, description = ?, isDone = ? 
 		WHERE id = ?`,
 		title, description, isDone, taskID,
+	)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateUserTaskOrder(taskID, sequenceNumber int64) error {
+	_, err := database.DB.Exec(`
+		Update Tasks
+		Set sequence = ?
+		WHERE id = ?`,
+		sequenceNumber, taskID,
 	)
 
 	if err != nil {

@@ -1,3 +1,5 @@
+const URL_Base = "http://localhost:8080/";
+
 const loginForm = document.getElementById("login");
 const registerForm = document.getElementById("register");
 const toggleOptions = document.getElementById("btn");
@@ -28,7 +30,7 @@ function registerUser(){
     registerSubmitButton.addEventListener("click", (e) =>{
         e.preventDefault();
 
-        const URL = "http://localhost:8080/register";
+        const URL = URL_Base + "register";
         const user = {
             id: 0,
             name: registerUsernameInput.value,
@@ -53,7 +55,7 @@ function registerUser(){
             .then(data => {
                 console.log("Response successful:", data);
             })
-            .catch(error => {
+            .catch(() => {
                 alert("Nutzer existiert bereits")
             })
 
@@ -82,9 +84,9 @@ function loginUser(){
                 if(!response.ok){
                     throw new Error("Network response was not ok");
                 }
-                window.location.href = "http://localhost:8080/todo-list/" + loginUsernameInput.value;
+                window.location.href = URL_Base + "todo-list/" + loginUsernameInput.value;
             })
-            .catch(error => {
+            .catch(() => {
                 alert("Nutzer konnte nicht angemeldet werden")
             })
     })

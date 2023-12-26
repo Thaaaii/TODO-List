@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"strings"
 	"time"
 )
 
@@ -22,7 +20,7 @@ func GenerateToken(username string) (string, error) {
 	return token.SignedString([]byte(tokenSecret))
 }
 
-func TokenValid(ctx *gin.Context, tokenString string) (*jwt.Token, error) {
+func TokenValid(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -35,22 +33,6 @@ func TokenValid(ctx *gin.Context, tokenString string) (*jwt.Token, error) {
 	}
 
 	return token, nil
-}
-
-// ExtractToken extracts the token from the context
-func ExtractToken(ctx *gin.Context) string {
-	token := ctx.Query("token")
-
-	if token != "" {
-		return token
-	}
-
-	bearerToken := ctx.Request.Header.Get("Authorization")
-
-	if len(strings.Split(bearerToken, " ")) == 2 {
-		return strings.Split(bearerToken, " ")[1]
-	}
-	return ""
 }
 
 // GenerateRandomKey generates a random 32-Bit Key (e.g. as token secret)
