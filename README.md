@@ -23,7 +23,7 @@ welche ich genutzt und für meine Zwecke angepasst habe.
 ```bash
 go run main.go 
 ```
-- im Browser die [Anwendung](http://localhost:8080/login) öffnen (http:/localhost:8080/login)
+- im Browser die [Anwendung](http://localhost:8080/login) öffnen (http://localhost:8080/login)
 - Logindaten eines Dummies eingeben (Nutzer: Thai, Passwort: 123)
 - alternativ: Registrierung eines neuen Nutzers und sofort loslegen
 - Task einfügen, indem ein Titel eingegeben wird und mit "Aufgabe hinzufügen" bestätigt wird
@@ -59,7 +59,7 @@ go run main.go
   - Abruf von Daten aus dem Backend
   - Speicherung aller Änderungen im Frontend im Backend (Datenbank)
 - Frontend Design des Logins
-- Registrierung,Login und Authentifikation mithilfe von JWT als Cookie
+- Registrierung, Login und Authentifikation mithilfe von JWT als Cookie
 - Anpassung der Routen im Front- + Backend und Einführung von Middleware, um Nutzerdaten zu schützen
 - Änderung der Reihenfolge von Aufgaben
 - Kommentare im Quelltext hinzugefügt
